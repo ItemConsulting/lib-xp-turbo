@@ -1,5 +1,4 @@
 import {XOR} from "enonic-types/types";
-import {getSocketIds} from "./socket-id-map";
 
 const websocketLib = __non_webpack_require__('/lib/xp/websocket');
 const sessionLib = __non_webpack_require__('/lib/session');
@@ -7,25 +6,43 @@ const portalLib = __non_webpack_require__('/lib/xp/portal');
 
 export const DEFAULT_GROUP_ID = "turbo-streams"
 
+/**
+ * Append some markup to a target id in the dom
+ */
 export function append(params: TurboStreamsUpdateParams) {
   dispatch(params, createMessage(params, "append"));
 }
 
+/**
+ * Prepend some markup to a target id in the dom
+ */
 export function prepend(params: TurboStreamsUpdateParams) {
   dispatch(params, createMessage(params, "prepend"));
 }
 
+/**
+ * Replace some markup at a target id in the dom
+ */
 export function replace(params: TurboStreamsUpdateParams) {
   dispatch(params, createMessage(params, "replace"));
 }
 
+/**
+ * Remove an element with a target id from the dom
+ */
 export function remove(params: TurboStreamsRemoveParams) {
   dispatch(params, `<turbo-stream action="remove" target="${params.target}"></turbo-stream>`);
 }
 
-export function getTurboStreamPageContribution(service: string = "turbo-streams"): Array<string> {
+/**
+ * Returns a page contribution that initializes the turbo stream frontend connecting it to the "turbo-streams" service,
+ * or another service specified by the developer.
+ */
+export function getTurboStreamPageContribution(
+  params: GetTurboStreamPageContributionParams = { service: "turbo-streams" }
+): Array<string> {
   const url = portalLib.serviceUrl({
-    service: service,
+    service: params.service,
     type: "absolute"
   })
     .replace("http://", "ws://")
@@ -36,17 +53,17 @@ export function getTurboStreamPageContribution(service: string = "turbo-streams"
   </script>`];
 }
 
-function dispatch(params: TurboStreamsUpdateParams | TurboStreamsRemoveParams, content: string) {
-  if (isGroupMessage(params)) {
-    websocketLib.sendToGroup(params.groupId, content);
-  } else {
-    const userSocketId = params.socketId ?? getSocketIds(sessionLib.getId())[0];
+export function getUsersPersonalGroupName(sessionId: string): string {
+  return `turbo-streams-${sessionId}`;
+}
 
-    if (userSocketId) {
-      websocketLib.send(userSocketId, content);
-    } else {
-      log.error("Turbo Streams is missing socket id")
-    }
+function dispatch(params: TurboStreamsUpdateParams | TurboStreamsRemoveParams, content: string) {
+  const groupId = params.groupId ?? getUsersPersonalGroupName(sessionLib.getId());
+
+  if (isSingleMessage(params)) {
+    websocketLib.send(params.socketId, content);
+  } else {
+    websocketLib.sendToGroup(groupId, content);
   }
 }
 
@@ -55,11 +72,11 @@ function createMessage(params: TurboStreamsUpdateParams, action: Action) {
       <template>
         ${params.content}
       </template>
-    </turbo-stream>`
+    </turbo-stream>`;
 }
 
-function isGroupMessage(params: unknown): params is ByGroupId {
-  return (params as ByGroupId).groupId !== undefined;
+function isSingleMessage(params: unknown): params is BySocketId {
+  return (params as BySocketId).socketId !== undefined;
 }
 
 type Action =
@@ -73,14 +90,14 @@ interface BySocketId {
    * The web socket id to send to.
    * Default value is socket id stored on user session by websocket service
    */
-  socketId?: string;
+  socketId: string;
 }
 
 interface ByGroupId {
   /**
    * A group of web socket connections to send content to
    */
-  groupId: string;
+  groupId?: string;
 }
 
 type Id = XOR<BySocketId, ByGroupId>;
@@ -103,3 +120,7 @@ export type TurboStreamsRemoveParams = {
    */
   target: string;
 } & Id
+
+export interface GetTurboStreamPageContributionParams {
+  readonly service: string;
+}

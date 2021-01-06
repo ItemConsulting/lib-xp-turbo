@@ -1,6 +1,5 @@
 import {Request, Response, WebSocketEvent} from "enonic-types/controller";
-import {addSocketId, logSocketIdMap, removeSocketId} from "../../lib/socket-id-map";
-import {DEFAULT_GROUP_ID} from "../../lib/turbo-streams";
+import {DEFAULT_GROUP_ID, getUsersPersonalGroupName} from "../../lib/turbo-streams";
 
 const sessionLib = __non_webpack_require__('/lib/session');
 const {addToGroup,removeFromGroup} = __non_webpack_require__('/lib/xp/websocket');
@@ -26,11 +25,14 @@ export function get(req: Request): Response {
 }
 
 export function webSocketEvent(event: WebSocketEvent<WithSessionId>): void {
+  const usersPersonalGroupName = getUsersPersonalGroupName(event.data.sessionId);
+
   if (event.type == 'open') {
-    addSocketId(event.data.sessionId, event.session.id);
+    addToGroup(usersPersonalGroupName, event.session.id);
     addToGroup(DEFAULT_GROUP_ID, event.session.id);
   } else if (event.type == 'close') {
-    removeSocketId(event.data.sessionId, event.session.id);
+    removeFromGroup(usersPersonalGroupName, event.session.id);
     removeFromGroup(DEFAULT_GROUP_ID, event.session.id);
   }
 }
+
