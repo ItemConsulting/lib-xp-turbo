@@ -1,8 +1,13 @@
 # Enonic XP Turbo Library
 
-Enonic XP Library for integrating with Turbo streams.
+Enonic XP Library for integrating with [Turbo Streams](https://turbo.hotwire.dev/reference/streams).
 
-## Installation  
+[ ![Download](https://api.bintray.com/packages/itemconsulting/public/no.item.xp.lib-xp-turbo/images/download.svg?version=1.0.0) ](https://bintray.com/itemconsulting/public/no.item.xp.lib-xp-turbo/1.0.0/link)
+
+
+<img src="https://github.com/ItemConsulting/lib-xp-turbo/raw/main/docs/icon.svg?sanitize=true" width="150">
+
+## Installation
 
 To install this library you need to add a new dependency to your app's build.gradle file.
 
@@ -33,17 +38,17 @@ Import the turbo script in your page html (has to be in `<head>`).
 </head>
 ```
 
-Initialize turbo streams to the websocket source for your page, by adding a `pageContribution`.
+You can use a `pageContribution` to add frontend JavaScript to initialize Turbo Streams.
 
 ```javascript
-var turboLib = require("/lib/turbo-streams");
+var turboStreamsLib = require("/lib/turbo-streams");
 
 exports.get = function(req) {
   return {
     status: 200,
     body: "",
     pageContributions: {
-      headEnd: turboLib.getTurboStreamPageContribution()
+      headEnd: turboStreamsLib.getTurboStreamPageContribution()
     }
   };
 }
@@ -53,28 +58,28 @@ exports.get = function(req) {
 Use the `append`, `prepend`, `replace` and `remove` functions in your code.
 
 ```javascript
-var turboLib = require('/lib/turbo-streams');
+var turboStreamsLib = require('/lib/turbo-streams');
 
 // Append some markup to a target id in the dom
-turboLib.append({
+turboStreamsLib.append({
   target: 'my-alert-wrapper-id', 
   content: '<div role="alert">Something went wrong</div>'
 });
 
 // Prepend some markup to a target id in the dom
-turboLib.prepend({
+turboStreamsLib.prepend({
   target: 'my-alert-wrapper-id', 
   content: '<div role="alert">Something else went wrong</div>'
 });
 
 // Replace some markup at a target id in the dom
-turboLib.replace({
+turboStreamsLib.replace({
   target: 'status-id', 
   content: '<div>Status has changed</div>'
 });
 
 // Remove an element with a target id from the dom
-turboLib.remove({
+turboStreamsLib.remove({
   target: 'status-id'
 });
 ```
