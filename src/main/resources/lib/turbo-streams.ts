@@ -1,7 +1,6 @@
 import {XOR} from "enonic-types/types";
 
 const websocketLib = __non_webpack_require__('/lib/xp/websocket');
-const sessionLib = __non_webpack_require__('/lib/session');
 const portalLib = __non_webpack_require__('/lib/xp/portal');
 
 export const DEFAULT_GROUP_ID = "turbo-streams"
@@ -53,12 +52,12 @@ export function getTurboStreamPageContribution(
   </script>`];
 }
 
-export function getUsersPersonalGroupName(sessionId: string): string {
-  return `turbo-streams-${sessionId}`;
+export function getUsersPersonalGroupName(): string {
+  return `turbo-streams-${getSessionId()}`;
 }
 
 function dispatch(params: TurboStreamsUpdateParams | TurboStreamsRemoveParams, content: string) {
-  const groupId = params.groupId ?? getUsersPersonalGroupName(sessionLib.getId());
+  const groupId = params.groupId ?? getUsersPersonalGroupName();
 
   if (isSingleMessage(params)) {
     websocketLib.send(params.socketId, content);
@@ -77,6 +76,11 @@ function createMessage(params: TurboStreamsUpdateParams, action: Action) {
 
 function isSingleMessage(params: unknown): params is BySocketId {
   return (params as BySocketId).socketId !== undefined;
+}
+
+function getSessionId(): string | null {
+  const bean = __.newBean('no.item.xp.session.SessionBean');
+  return bean.getId();
 }
 
 type Action =

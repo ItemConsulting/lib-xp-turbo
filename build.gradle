@@ -1,15 +1,13 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.moowork.node' version '1.3.1'
+    id 'com.github.node-gradle.node' version '2.2.3'
     id 'com.enonic.xp.base' version '2.0.0'
     id "com.jfrog.bintray" version "1.8.4"
 }
 
 dependencies {
-    include "com.enonic.xp:lib-portal:${xpVersion}"
-    include "com.enonic.xp:lib-websocket:${xpVersion}"
-    include 'no.item.xp:lib-xp-session:1.0.0'
+    compile "com.enonic.xp:portal-api:${xpVersion}"
 }
 
 repositories {
@@ -17,13 +15,13 @@ repositories {
     jcenter()
     xp.enonicRepo()
     maven {
-        url  "http://itemconsulting.bintray.com/public"
+        url  "https://dl.bintray.com/itemconsulting/public"
     }
 }
 
 node {
     download = true
-    version '10.16.0'
+    version = '12.13.1'
 }
 
 task npmInstallForce( type: NpmTask ) {
@@ -37,6 +35,7 @@ task cleanNode( type: org.gradle.api.tasks.Delete ) {
 
 task serverWebpack( type: NodeTask, dependsOn: npmInstall ) {
     environment = [ 'NODE_ENV': nodeEnvironment() ]
+    // args = [ '--config', 'webpack.server.config.babel.js', '--color', '--hide-modules' ]
     args = [ '--config', 'webpack.server.config.js', '--color', '--hide-modules' ]
     description = 'Build server JS.'
     inputs.dir 'src/main'
