@@ -15,13 +15,15 @@ To install this library you need to add a new dependency to your app's build.gra
 
 ```groovy
 repositories {
-    maven {
-      url  "http://itemconsulting.bintray.com/public"
-    }
+  maven {
+    url  "http://itemconsulting.bintray.com/public"
+  }
 }
 
 dependencies {
-    include 'no.item.xp:lib-xp-turbo:1.0.0'
+  include "com.enonic.xp:lib-portal:${xpVersion}"
+  include "com.enonic.xp:lib-websocket:${xpVersion}"
+  include 'no.item.xp:lib-xp-turbo:1.0.0'
 }
 ```
 
