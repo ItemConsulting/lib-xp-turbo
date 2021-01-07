@@ -6,6 +6,9 @@ plugins {
     id "com.jfrog.bintray" version "1.8.4"
 }
 
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
 dependencies {
     compile "com.enonic.xp:portal-api:${xpVersion}"
 }

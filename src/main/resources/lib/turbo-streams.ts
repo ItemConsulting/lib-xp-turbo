@@ -79,7 +79,7 @@ function isSingleMessage(params: unknown): params is BySocketId {
 }
 
 function getSessionId(): string | null {
-  const bean = __.newBean('no.item.xp.session.SessionBean');
+  const bean = __.newBean('no.item.xp.turbo.SessionBean');
   return bean.getId();
 }
 
