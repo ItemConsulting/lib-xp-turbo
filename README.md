@@ -7,11 +7,9 @@ Enonic XP Library for integrating with [Turbo Streams](https://turbo.hotwire.dev
 
 <img src="https://github.com/ItemConsulting/lib-xp-turbo/raw/main/docs/icon.svg?sanitize=true" width="150">
 
-## Installation
+## Gradle
 
 To install this library you need to add a new dependency to your app's build.gradle file.
-
-### Gradle
 
 ```groovy
 repositories {
@@ -31,6 +29,10 @@ dependencies {
 
 Import the turbo script in your page html (has to be in `<head>`).
 
+**Warning:** Including the *turbo.es5-umd.min.js* file will affect the basic functionality of your page (like navigation). 
+Read the [Turbo documentation](https://turbo.hotwire.dev/handbook/introduction) to make sure that this is something you 
+want to do.
+
 ```html  
 <head>
   <script
@@ -40,7 +42,8 @@ Import the turbo script in your page html (has to be in `<head>`).
 </head>
 ```
 
-You can use a `pageContribution` to add frontend JavaScript to initialize Turbo Streams.
+You can use a `pageContribution` to add frontend JavaScript to initialize a WebSocket connection against the 
+["turbo-streams" *service*](./src/main/resources/services/turbo-streams/turbo-streams.ts) provided by this library.
 
 ```javascript
 var turboStreamsLib = require("/lib/turbo-streams");
@@ -83,6 +86,58 @@ turboStreamsLib.replace({
 // Remove an element with a target id from the dom
 turboStreamsLib.remove({
   target: 'status-id'
+});
+```
+
+## Selecting web sockets
+
+### Default setup
+
+If you use the default setup – like specified above – you **don't** have to specify `socketId` or `groupId` at all. 
+
+If you used the page contribution from `getTurboStreamPageContribution()` a web socket connections was initialized against
+the `"turbo-streams"` *service*. The service registered the socket with a *websocket group* based on the users session id.
+
+It is this group – based on the user's session id – that is the default receiver of messages from `append`, `prepend`,
+`replace` and `remove`.
+
+### Send to all users' browser at same time
+
+If you want to send a message to every browser connected to the `"turbo-streams"` *service*. You can use the default 
+group with the id specified in the constant `DEFAULT_GROUP_ID`:
+
+```javascript
+turboStreamsLib.append({
+  target: 'my-special-id', 
+  content: '<div role="alert">Hello</div>',
+  groupId: turboStreamsLib.DEFAULT_GROUP_ID
+});
+```
+
+### Send to specific socket
+
+If you know the `socketId` of a websocket (you get it from `event.session.id` in `webSocketEvent()`), you can use it as 
+the channel for messages from this library.
+
+```javascript
+turboStreamsLib.append({
+  target: 'my-special-id', 
+  content: '<div role="alert">Hello</div>',
+  socketId: mySocketId
+});
+```
+
+### Send to specific web socket group
+
+If you want to send messages to a websocket group of your choice you can use `groupId` to specify it. To register new 
+groups you need to create your own *service* that exposes your own socket, instead of using the built in service 
+named `"turbo-streams"`.
+
+```javascript
+turboStreamsLib.append({
+  target: 'my-special-id', 
+  content: '<div role="alert">Hello</div>',
+  groupId: myGroupId
 });
 ```
 
