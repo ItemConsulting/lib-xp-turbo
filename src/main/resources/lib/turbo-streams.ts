@@ -66,7 +66,7 @@ function dispatch(params: TurboStreamsParamsWithoutContent, content: string) {
   }
 }
 
-function createMessage(params: TurboStreamsParams, action: Action) {
+function createMessage(params: TurboStreamsParams, action: 'append' | 'prepend' | 'replace') {
   return `<turbo-stream action="${action}" target="${params.target}">
       <template>
         ${params.content}
@@ -82,12 +82,6 @@ function getSessionId(): string | null {
   const bean = __.newBean('no.item.xp.session.SessionBean');
   return bean.getId();
 }
-
-type Action =
-  | 'append'
-  | 'prepend'
-  | 'replace'
-  | 'remove';
 
 /**
  * Send message trough a socket specified by a socket id
@@ -134,7 +128,7 @@ export type TurboStreamsParams = {
 export type TurboStreamsParamsWithoutContent = Omit<TurboStreamsParams, "content">;
 
 /**
- *
+ * Params for configuring page contributions
  */
 export interface GetTurboStreamPageContributionParams {
   readonly service: string;
