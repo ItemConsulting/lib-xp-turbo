@@ -141,6 +141,12 @@ turboStreamsLib.append({
 });
 ```
 
+### TypeScript
+
+If you are using TypeScript in your application,
+[types](https://github.com/ItemConsulting/enonic-types/blob/main/src/turbo.ts) for this library has been added to the
+[*enonic-types*](https://github.com/ItemConsulting/enonic-types) library.
+
 ### Building
 
 To build he project run the following code
