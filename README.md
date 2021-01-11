@@ -9,7 +9,7 @@ Enonic XP Library for integrating with [Turbo Streams](https://turbo.hotwire.dev
 
 ## Gradle
 
-To install this library you need to add a new dependency to your app's build.gradle file.
+To install this library you may need to add some new dependencies to your app's build.gradle file.
 
 ```groovy
 repositories {
@@ -22,45 +22,76 @@ dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
   include 'no.item.xp:lib-xp-turbo:1.0.0'
+  webjar "org.webjars.npm:hotwired__turbo:7.0.0-beta.2"
 }
 ```
 
 ## Setup
 
-Import the turbo script in your page html (has to be in `<head>`).
+### Page template
 
 **Warning:** Including the *turbo.es5-umd.min.js* file will affect the basic functionality of your page (like navigation). 
 Read the [Turbo documentation](https://turbo.hotwire.dev/handbook/introduction) to make sure that this is something you 
 want to do.
 
+ 1. You need to place the  `turboStreamUrl` JavaScript variable on the *global scope* so that the initialization script 
+    has access to it.
+ 2. Import the turbo script in your page html (has to be in `<head>`).
+ 3. A simple [initialization script](./src/main/resources/assets/init-turbo-streams.js) is included with this library. 
+    Note that this JavaScript code can't be inlined, but needs to be included as a script file because of how Turbo works.
+
 ```html  
 <head>
+  <!-- 1. -->
+  <script data-th-inline="javascript">
+    var turboStreamUrl = /*[[${turboStreamUrl}]]*/ undefined;
+  </script>
+  
+  <!-- 2. Imported as a webjar (see above) -->
   <script
-    src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.0.0-beta.2/dist/turbo.es5-umd.min.js"
-    crossorigin="anonymous">
+    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.0.0-beta.2/dist/turbo.es5-umd.js'})}"
+    defer>
+  </script>
+
+  <!-- 3. -->
+  <script
+    data-th-src="${portal.assetUrl({'_path=init-turbo-streams.js'})}"
+    defer>
   </script>
 </head>
 ```
 
-You can use a `pageContribution` to add frontend JavaScript to initialize a WebSocket connection against the 
-["turbo-streams" *service*](./src/main/resources/services/turbo-streams/turbo-streams.ts) provided by this library.
+### Page controller
+
+You need to provide the template above with the `turboStreamUrl` variable. You can either use `getWebSocketUrl()`
+function without parameters, and get the default web socket provided by this library. Or you can use your own 
+service like this: `getWebSocketUrl({ service: 'myservice' })`:
 
 ```javascript
 var turboStreamsLib = require("/lib/turbo-streams");
 
+var view = resolve("mypage.html")
+
 exports.get = function(req) {
+  var thymeleafParams = {
+    turboStreamUrl: turboStreamsLib.getWebSocketUrl()
+  }
+  
   return {
     status: 200,
-    body: "",
-    pageContributions: {
-      headEnd: turboStreamsLib.getTurboStreamPageContribution()
-    }
+    body: thymeleafLib.render(view, thymeleafParams),
   };
 }
 ```
 ## Usage
 
-Use the `append`, `prepend`, `replace` and `remove` functions in your code.
+You can now directly manipulate the dom from serverside JavaScript over websocket, using following functions:
+ - `append({ target, content });`
+ - `prepend({ target, content });`
+ - `replace({ target, content });`
+ - `remove({ target });`
+
+### Example
 
 ```javascript
 var turboStreamsLib = require('/lib/turbo-streams');

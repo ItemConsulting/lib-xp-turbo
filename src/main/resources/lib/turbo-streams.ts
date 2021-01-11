@@ -3,26 +3,26 @@ import {XOR} from "enonic-types/types";
 const websocketLib = __non_webpack_require__('/lib/xp/websocket');
 const portalLib = __non_webpack_require__('/lib/xp/portal');
 
-export const DEFAULT_GROUP_ID = "turbo-streams"
+export const DEFAULT_GROUP_ID = "turbo-streams";
 
 /**
  * Append some markup to a target id in the dom
  */
-export function append(params: TurboStreamsParams) {
+export function append(params: TurboStreamsParams): void {
   dispatch(params, createMessage(params, "append"));
 }
 
 /**
  * Prepend some markup to a target id in the dom
  */
-export function prepend(params: TurboStreamsParams) {
+export function prepend(params: TurboStreamsParams): void {
   dispatch(params, createMessage(params, "prepend"));
 }
 
 /**
  * Replace some markup at a target id in the dom
  */
-export function replace(params: TurboStreamsParams) {
+export function replace(params: TurboStreamsParams): void {
   dispatch(params, createMessage(params, "replace"));
 }
 
@@ -34,29 +34,22 @@ export function remove(params: TurboStreamsParamsWithoutContent) {
 }
 
 /**
- * Returns a page contribution that initializes the turbo stream frontend connecting it to the "turbo-streams" service,
- * or another service specified by the developer.
+ * Returns a url to a service, but using the web socket protocols
  */
-export function getTurboStreamPageContribution(
-  params: GetTurboStreamPageContributionParams = { service: "turbo-streams" }
-): Array<string> {
-  const url = portalLib.serviceUrl({
+export function getWebSocketUrl(params: GetWebSocketUrlParams = { service: "turbo-streams" }): string {
+  return portalLib.serviceUrl({
     service: params.service,
     type: "absolute"
   })
     .replace("http://", "ws://")
     .replace("https://", "wss://");
-
-  return [`<script>
-    Turbo.connectStreamSource(new WebSocket("${url}"));
-  </script>`];
 }
 
 export function getUsersPersonalGroupName(): string {
   return `turbo-streams-${getSessionId()}`;
 }
 
-function dispatch(params: TurboStreamsParamsWithoutContent, content: string) {
+function dispatch(params: TurboStreamsParamsWithoutContent, content: string): void {
   const groupId = params.groupId ?? getUsersPersonalGroupName();
 
   if (isSingleMessage(params)) {
@@ -66,7 +59,7 @@ function dispatch(params: TurboStreamsParamsWithoutContent, content: string) {
   }
 }
 
-function createMessage(params: TurboStreamsParams, action: 'append' | 'prepend' | 'replace') {
+function createMessage(params: TurboStreamsParams, action: 'append' | 'prepend' | 'replace'): string {
   return `<turbo-stream action="${action}" target="${params.target}">
       <template>
         ${params.content}
@@ -128,8 +121,8 @@ export type TurboStreamsParams = {
 export type TurboStreamsParamsWithoutContent = Omit<TurboStreamsParams, "content">;
 
 /**
- * Params for configuring page contributions
+ * Params for configuring web socket urls
  */
-export interface GetTurboStreamPageContributionParams {
+export interface GetWebSocketUrlParams {
   readonly service: string;
 }
