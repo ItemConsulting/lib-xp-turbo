@@ -172,6 +172,47 @@ turboStreamsLib.append({
 });
 ```
 
+### Turbo Streams over HTTP
+
+It is also possible to return turbo streams over http with the `Content-Type` `"text/vnd.turbo-stream.html"`.
+
+This can for instance be returned by a form submission to perform multiple actions the web page's dom.
+
+Use the `acceptTurboStreams()` to check if Turbo Streams is supported. Then use `serialize()` to transform
+an `Array` of `{ action, target, content }` to a `string` with Turbo Stream actions.
+
+```javascript
+var turboStreamsLib = require('/lib/turbo-streams');
+
+exports.post = function(req) {
+  // if "Accept" header includes mime type
+  if (turboStreamsLib.acceptTurboStreams(req)) {
+    return {
+      status: 200,
+      contentType: turboStreamsLib.MIME_TYPE_TURBO_STREAMS,
+      // returns two actions to be performed on the dom on the page
+      body: turboStreamsLib.serialize([
+        {
+          action: 'append',
+          target: 'my-alert-wrapper-id',
+          content: '<div role="alert">Something went wrong</div>'
+        },
+        {
+          action: 'replace',
+          target: 'status-id',
+          content: '<div>Status has changed</div>'
+        }
+      ])
+    }
+  } else {
+    return {
+      status: 200,
+      body: "This page doesn't accept Turbo Streams"
+    }
+  }
+}
+```
+
 ### TypeScript
 
 If you are using TypeScript in your application,
