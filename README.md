@@ -22,7 +22,7 @@ dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
   include 'no.item.xp:lib-xp-turbo:1.0.0'
-  webjar "org.webjars.npm:hotwired__turbo:7.0.0-beta.2"
+  webjar "org.webjars.npm:hotwired__turbo:7.0.0-beta.3"
 }
 ```
 
@@ -49,7 +49,7 @@ want to do.
   
   <!-- 2. Imported as a webjar (see above) -->
   <script
-    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.0.0-beta.2/dist/turbo.es5-umd.js'})}"
+    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.0.0-beta.3/dist/turbo.es5-umd.js'})}"
     defer>
   </script>
 
@@ -75,7 +75,7 @@ var view = resolve("mypage.html")
 exports.get = function(req) {
   var thymeleafParams = {
     turboStreamUrl: turboStreamsLib.getWebSocketUrl()
-  }
+  };
   
   return {
     status: 200,
