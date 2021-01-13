@@ -44,12 +44,22 @@ export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
 /**
  * Serializes actions to frames that can be sent over the wire
  */
-export function serialize(params: TurboStreamAction): string {
-  return (params.action === "remove")
-    ? `<turbo-stream action="remove" target="${params.target}"></turbo-stream>`
-    : `<turbo-stream action="${params.action}" target="${params.target}">
+export function serialize(action: TurboStreamAction): string;
+export function serialize(actions: ReadonlyArray<TurboStreamAction>): string;
+export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string {
+  return (actions instanceof Array)
+    ? actions
+      .map(serializeOne)
+      .join("\n")
+    : serializeOne(actions);
+}
+
+function serializeOne(action: TurboStreamAction): string {
+  return (action.action === "remove")
+    ? `<turbo-stream action="remove" target="${action.target}"></turbo-stream>`
+    : `<turbo-stream action="${action.action}" target="${action.target}">
         <template>
-          ${params.content}
+          ${action.content}
         </template>
-      </turbo-stream>`
+      </turbo-stream>`;
 }
