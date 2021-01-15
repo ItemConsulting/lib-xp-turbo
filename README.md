@@ -89,6 +89,7 @@ You can now directly manipulate the dom from serverside JavaScript over websocke
  - `append({ target, content });`
  - `prepend({ target, content });`
  - `replace({ target, content });`
+ - `update({ target, content });`
  - `remove({ target });`
 
 ### Example
@@ -111,7 +112,13 @@ turboStreamsLib.prepend({
 // Replace some markup at a target id in the dom
 turboStreamsLib.replace({
   target: 'status-id', 
-  content: '<div>Status has changed</div>'
+  content: '<div id="status-id">Status has changed</div>'
+});
+
+// Update the contents inside at a target id in the dom
+turboStreamsLib.update({
+  target: 'status-id',
+  content: 'Status has changed again!'
 });
 
 // Remove an element with a target id from the dom
@@ -130,7 +137,7 @@ If you used the page contribution from `getTurboStreamPageContribution()` a web 
 the `"turbo-streams"` *service*. The service registered the socket with a *websocket group* based on the users session id.
 
 It is this group – based on the user's session id – that is the default receiver of messages from `append`, `prepend`,
-`replace` and `remove`.
+`replace`, `update` and `remove`.
 
 ### Send to all users' browser at same time
 

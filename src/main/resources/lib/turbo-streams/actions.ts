@@ -1,8 +1,8 @@
-export interface TurboStreamUpdateAction {
+export interface TurboStreamChangeAction {
   /**
    * Action to perform
    */
-  readonly action: "append" | "prepend" | "replace";
+  readonly action: "append" | "prepend" | "replace" | "update";
 
   /**
    * Dom ID to update
@@ -30,14 +30,14 @@ export interface TurboStreamRemoveAction {
 /**
  * Type that can be serialized into a turbo stream action frame
  */
-export type TurboStreamAction = TurboStreamUpdateAction | TurboStreamRemoveAction;
+export type TurboStreamAction = TurboStreamChangeAction | TurboStreamRemoveAction;
 
 /**
  * Guard that verifies that an object is of type TurboStreamAction
  */
 export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
   const value = (v as TurboStreamAction);
-  return ["append",  "prepend", "replace", "remove"].indexOf(value.action) !== -1
+  return v !== undefined && v !== null && ["append",  "prepend", "replace", "remove"].indexOf(value.action) !== -1
     && typeof value.target === "string";
 }
 
@@ -46,6 +46,7 @@ export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
  */
 export function serialize(action: TurboStreamAction): string;
 export function serialize(actions: ReadonlyArray<TurboStreamAction>): string;
+export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string;
 export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string {
   return (actions instanceof Array)
     ? actions

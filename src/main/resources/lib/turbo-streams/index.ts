@@ -1,5 +1,5 @@
 import {sendByWebSocket, SendByWebSocketTarget} from "./websockets";
-import {serialize, TurboStreamRemoveAction, TurboStreamUpdateAction} from "./actions";
+import {serialize, TurboStreamRemoveAction, TurboStreamChangeAction} from "./actions";
 import {Request} from "enonic-types/controller";
 
 /**
@@ -46,6 +46,17 @@ export function replace(params: TurboStreamsParams): void {
 }
 
 /**
+ * Updates some markup inside a target with the id in the dom over web socket
+ */
+export function update(params: TurboStreamsParams): void {
+  sendByWebSocket(params, serialize({
+    action: "update",
+    content: params.content,
+    target: params.target
+  }));
+}
+
+/**
  * Remove an element with a target id from the dom over web socket
  */
 export function remove(params: TurboStreamsRemoveParams) {
@@ -68,7 +79,7 @@ export function acceptTurboStreams(req: Request): boolean {
  * If neither is specified it falls back to the default group. The default group has a name based on the session
  * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
  */
-export type TurboStreamsParams = Omit<TurboStreamUpdateAction, "action"> & SendByWebSocketTarget;
+export type TurboStreamsParams = Omit<TurboStreamChangeAction, "action"> & SendByWebSocketTarget;
 
 /**
  * Parameters for "remove". It takes either "socketId" or "groupId".
