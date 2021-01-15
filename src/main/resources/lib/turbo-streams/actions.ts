@@ -37,7 +37,7 @@ export type TurboStreamAction = TurboStreamChangeAction | TurboStreamRemoveActio
  */
 export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
   const value = (v as TurboStreamAction);
-  return v !== undefined && v !== null && ["append",  "prepend", "replace", "remove"].indexOf(value.action) !== -1
+  return v !== undefined && v !== null && ["append",  "prepend", "replace", "update", "remove"].indexOf(value.action) !== -1
     && typeof value.target === "string";
 }
 
@@ -58,9 +58,10 @@ export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStream
 function serializeOne(action: TurboStreamAction): string {
   return (action.action === "remove")
     ? `<turbo-stream action="remove" target="${action.target}"></turbo-stream>`
-    : `<turbo-stream action="${action.action}" target="${action.target}">
-        <template>
-          ${action.content}
-        </template>
-      </turbo-stream>`;
+    : `
+<turbo-stream action="${action.action}" target="${action.target}">
+  <template>
+    ${action.content}
+  </template>
+</turbo-stream>`.trim();
 }
