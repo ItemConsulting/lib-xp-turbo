@@ -1,7 +1,6 @@
 import {XOR} from "enonic-types/types";
-
-const portalLib = __non_webpack_require__('/lib/xp/portal');
-const websocketLib = __non_webpack_require__('/lib/xp/websocket');
+import {serviceUrl}  from "/lib/xp/portal";
+import {send, sendToGroup} from "/lib/xp/websocket";
 
 /**
  * Returns a websocket group name specific for the user, based on the user session number
@@ -15,7 +14,7 @@ export function getUsersPersonalGroupName(): string {
  * Returns a url to a service, but using the web socket protocols
  */
 export function getWebSocketUrl(params: GetWebSocketUrlParams = { service: "turbo-streams" }): string {
-  return portalLib.serviceUrl({
+  return serviceUrl({
     service: params.service,
     type: "absolute"
   })
@@ -28,10 +27,10 @@ export function getWebSocketUrl(params: GetWebSocketUrlParams = { service: "turb
  */
 export function sendByWebSocket(params: SendByWebSocketTarget, content: string): void {
   if (isSingleMessage(params)) {
-    websocketLib.send(params.socketId, content);
+    send(params.socketId, content);
   } else {
     const groupId = params.groupId ?? getUsersPersonalGroupName();
-    websocketLib.sendToGroup(groupId, content);
+    sendToGroup(groupId, content);
   }
 }
 

@@ -1,9 +1,8 @@
-import {HttpResponse, Request, WebSocketEvent, WebSocketResponse} from "enonic-types/controller";
+import {Response, Request, WebSocketEvent, WebSocketResponse} from "enonic-types/controller";
 import {DEFAULT_GROUP_ID, getUsersPersonalGroupName} from "../../lib/turbo-streams";
+import {addToGroup} from "/lib/xp/websocket";
 
-const {addToGroup} = __non_webpack_require__('/lib/xp/websocket');
-
-export function get(req: Request): HttpResponse | WebSocketResponse<WebSocketData> {
+export function get(req: Request): Response | WebSocketResponse<WebSocketData> {
   if (!req.webSocket) {
     return {
       status: 404

@@ -6,7 +6,10 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "types": [
+      "enonic-types"
+    ]
   },
   "types": [
     "types"

@@ -1,4 +1,4 @@
-type LibMap = import("enonic-types").EnonicLibraryMap;
+type LibMap = import("enonic-types/libs").EnonicLibraryMap;
 
 declare const __non_webpack_require__: <K extends keyof LibMap | string = string>(path: K) => K extends keyof LibMap
   ? LibMap[K]
