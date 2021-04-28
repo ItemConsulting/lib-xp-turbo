@@ -3,7 +3,6 @@ plugins {
     id 'maven-publish'
     id 'com.github.node-gradle.node' version '2.2.3'
     id 'com.enonic.xp.base' version '2.0.0'
-    id "com.jfrog.bintray" version "1.8.4"
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -17,9 +16,6 @@ repositories {
     mavenLocal()
     jcenter()
     xp.enonicRepo()
-    maven {
-        url  "https://dl.bintray.com/itemconsulting/public"
-    }
 }
 
 node {
@@ -77,24 +73,6 @@ publishing {
             groupId group
             artifactId projectName
             version version
-        }
-    }
-}
-
-bintray {
-    user = "$bintrayUser"
-    key = "$bintrayApiKey"
-    publications = ['mavenJava']
-    configurations = ['archives']
-    pkg {
-        repo = 'public'
-        name = 'no.item.xp.lib-xp-turbo'
-        userOrg = 'itemconsulting'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/ItemConsulting/lib-xp-turbo.git'
-        version {
-            name = project.version
-            released = new Date()
         }
     }
 }
