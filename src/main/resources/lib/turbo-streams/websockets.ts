@@ -1,22 +1,24 @@
-import {XOR} from "enonic-types/types";
-import {serviceUrl}  from "/lib/xp/portal";
-import {send, sendToGroup} from "/lib/xp/websocket";
+import { type XOR } from "enonic-types/types";
+import { serviceUrl } from "/lib/xp/portal";
+import { send, sendToGroup } from "/lib/xp/websocket";
 
 /**
  * Returns a websocket group name specific for the user, based on the user session number
  */
 export function getUsersPersonalGroupName(): string {
-  const bean = __.newBean('no.item.xp.turbo.SessionBean');
+  const bean = __.newBean("no.item.xp.turbo.SessionBean");
   return `turbo-streams-${bean.getId()}`;
 }
 
 /**
  * Returns a url to a service, but using the web socket protocols
  */
-export function getWebSocketUrl(params: GetWebSocketUrlParams = { service: "turbo-streams" }): string {
+export function getWebSocketUrl(
+  params: GetWebSocketUrlParams = { service: "turbo-streams" }
+): string {
   return serviceUrl({
     service: params.service,
-    type: "absolute"
+    type: "absolute",
   })
     .replace("http://", "ws://")
     .replace("https://", "wss://");
@@ -25,7 +27,10 @@ export function getWebSocketUrl(params: GetWebSocketUrlParams = { service: "turb
 /**
  * Sends some content over web socket, either based on `socketId` or `groupId`.
  */
-export function sendByWebSocket(params: SendByWebSocketTarget, content: string): void {
+export function sendByWebSocket(
+  params: SendByWebSocketTarget,
+  content: string
+): void {
   if (isSingleMessage(params)) {
     send(params.socketId, content);
   } else {

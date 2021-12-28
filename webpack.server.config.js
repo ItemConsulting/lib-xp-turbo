@@ -2,7 +2,6 @@ const path = require('path');
 const glob = require('glob');
 const R = require('ramda');
 const TerserPlugin = require('terser-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {
   setEntriesForPath,
   addRule,
@@ -20,7 +19,7 @@ const config = {
   context: path.join(__dirname, RESOURCES_PATH),
   entry: {},
   externals: [
-    /(\/lib\/(enonic|xp|mustache|thymeleaf))?\/.+/
+    /^\/lib\/(.+|\$)$/i
   ],
   output: {
     path: path.join(__dirname, '/build/resources/main'),
@@ -32,26 +31,24 @@ const config = {
   },
   optimization: {
     minimizer: [
-      new TerserPlugin(),
+      new TerserPlugin({
+        terserOptions: {
+          compress: {
+            drop_console: false,
+          },
+          keep_classnames: true,
+          keep_fnames: true,
+        }
+      }),
     ],
     splitChunks: {
       minSize: 30000,
     },
   },
-  plugins: [
-    new CopyWebpackPlugin([
-      // { from: 'babel-standalone/', to: 'assets/babel-standalone/' },
-    ], {
-      context: path.resolve(__dirname, 'node_modules')
-    })
-  ],
-  externals: [
-    /\/lib\/(enonic|xp)\/.+/
-  ],
   mode: env.type,
   // Source maps are not usable in server scripts
   devtool: false,
-}
+};
 
 // ----------------------------------------------------------------------------
 // JavaScript loaders
@@ -80,7 +77,7 @@ function addTypeScriptSupport(cfg) {
 
   const entries = listEntries('ts', [
     // Add additional files to the ignore list.
-    // The following path will be transformed to 'src/main/resources/lib/observe/observe.ts:
+    // The following path will be transformed to 'src/main/resources/types.ts:
     'types.ts'
   ]);
 

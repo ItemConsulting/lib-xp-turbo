@@ -1,11 +1,15 @@
-import {Response, Request, WebSocketEvent, WebSocketResponse} from "enonic-types/controller";
-import {DEFAULT_GROUP_ID, getUsersPersonalGroupName} from "../../lib/turbo-streams";
-import {addToGroup} from "/lib/xp/websocket";
+import {
+  DEFAULT_GROUP_ID,
+  getUsersPersonalGroupName,
+} from "../../lib/turbo-streams";
+import { addToGroup } from "/lib/xp/websocket";
 
-export function get(req: Request): Response | WebSocketResponse<WebSocketData> {
+export function get(
+  req: XP.Request
+): XP.Response | XP.WebSocketResponse<WebSocketData> {
   if (!req.webSocket) {
     return {
-      status: 404
+      status: 404,
     };
   }
 
@@ -13,14 +17,14 @@ export function get(req: Request): Response | WebSocketResponse<WebSocketData> {
     webSocket: {
       data: {
         usersPersonalGroupName: getUsersPersonalGroupName(),
-        groupId: req.params.groupId
-      }
-    }
+        groupId: req.params.groupId,
+      },
+    },
   };
 }
 
-export function webSocketEvent(event: WebSocketEvent<WebSocketData>): void {
-  if (event.type == 'open') {
+export function webSocketEvent(event: XP.WebSocketEvent<WebSocketData>): void {
+  if (event.type == "open") {
     addToGroup(event.data.usersPersonalGroupName, event.session.id);
     addToGroup(DEFAULT_GROUP_ID, event.session.id);
 
@@ -34,5 +38,3 @@ interface WebSocketData {
   usersPersonalGroupName: string;
   groupId?: string;
 }
-
-

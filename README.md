@@ -18,8 +18,8 @@ repositories {
 dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
-  include 'no.item:lib-xp-turbo:1.0.0'
-  webjar "org.webjars.npm:hotwired__turbo:7.0.0-beta.3"
+  include 'no.item:lib-xp-turbo:1.0.2'
+  webjar "org.webjars.npm:hotwired__turbo:7.1.0"
 }
 ```
 
@@ -46,7 +46,7 @@ want to do.
 
   <!-- 2. Imported as a webjar (see above) -->
   <script
-    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.0.0-beta.3/dist/turbo.es5-umd.js'})}"
+    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.1.0/dist/turbo.es2017-umd.js'})}"
     defer>
   </script>
 
@@ -88,6 +88,8 @@ You can now directly manipulate the dom from serverside JavaScript over websocke
  - `replace({ target, content });`
  - `update({ target, content });`
  - `remove({ target });`
+ - `before({ target, content });`
+ - `after({ target, content });`
 
 ### Example
 
@@ -121,6 +123,18 @@ turboStreamsLib.update({
 // Remove an element with a target id from the dom
 turboStreamsLib.remove({
   target: 'status-id'
+});
+
+// Insert some markup before a target id in the dom
+turboStreamsLib.before({
+  target: 'my-alert-id',
+  content: '<div role="alert">Something else went wrong</div>'
+});
+
+// Insert some markup after a target id in the dom
+turboStreamsLib.after({
+  target: 'my-alert-id',
+  content: '<div role="alert">Something else went wrong</div>'
 });
 ```
 
@@ -238,18 +252,7 @@ Deploy locally for testing purposes:
 ```bash
 ./gradlew publishToMavenLocal
 ```
-### Deploy to Bintray
+## Deploy to Jitpack
 
-Since we should not check secrets into git, first you need to add some parameters to `~/.gradle/gradle.properties` to be
-able to publish:
-
-```properties
-bintrayUser=myUser
-bintrayApiKey=mySecretApiKey
-```
-
-Run the following code to deploy a new version of the library to [Bintray](https://bintray.com/itemconsulting).
-
-```bash
-./gradlew bintrayUpload
-```
+Go to the [Jitpack page for lib-xp-turbo](https://jitpack.io/#no.item/lib-xp-turbo) to deploy from Github (after
+[creating a new versioned release](https://github.com/ItemConsulting/lib-xp-turbo/releases/new)).

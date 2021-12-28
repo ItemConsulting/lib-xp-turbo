@@ -2,7 +2,13 @@ export interface TurboStreamChangeAction {
   /**
    * Action to perform
    */
-  readonly action: "append" | "prepend" | "replace" | "update";
+  readonly action:
+    | "append"
+    | "prepend"
+    | "replace"
+    | "update"
+    | "before"
+    | "after";
 
   /**
    * Dom ID to update
@@ -30,15 +36,23 @@ export interface TurboStreamRemoveAction {
 /**
  * Type that can be serialized into a turbo stream action frame
  */
-export type TurboStreamAction = TurboStreamChangeAction | TurboStreamRemoveAction;
+export type TurboStreamAction =
+  | TurboStreamChangeAction
+  | TurboStreamRemoveAction;
 
 /**
  * Guard that verifies that an object is of type TurboStreamAction
  */
 export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
-  const value = (v as TurboStreamAction);
-  return v !== undefined && v !== null && ["append",  "prepend", "replace", "update", "remove"].indexOf(value.action) !== -1
-    && typeof value.target === "string";
+  const value = v as TurboStreamAction;
+  return (
+    v !== undefined &&
+    v !== null &&
+    ["append", "prepend", "replace", "update", "remove"].indexOf(
+      value.action
+    ) !== -1 &&
+    typeof value.target === "string"
+  );
 }
 
 /**
@@ -46,17 +60,19 @@ export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
  */
 export function serialize(action: TurboStreamAction): string;
 export function serialize(actions: ReadonlyArray<TurboStreamAction>): string;
-export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string;
-export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string {
-  return (actions instanceof Array)
-    ? actions
-      .map(serializeOne)
-      .join("\n")
+export function serialize(
+  actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>
+): string;
+export function serialize(
+  actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>
+): string {
+  return actions instanceof Array
+    ? actions.map(serializeOne).join("\n")
     : serializeOne(actions);
 }
 
 function serializeOne(action: TurboStreamAction): string {
-  return (action.action === "remove")
+  return action.action === "remove"
     ? `<turbo-stream action="remove" target="${action.target}"></turbo-stream>`
     : `
 <turbo-stream action="${action.action}" target="${action.target}">
