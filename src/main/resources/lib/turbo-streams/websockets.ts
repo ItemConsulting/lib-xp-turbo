@@ -1,5 +1,5 @@
 import { type XOR } from "enonic-types/types";
-import { serviceUrl } from "/lib/xp/portal";
+import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
 
 /**
@@ -17,8 +17,8 @@ export function getWebSocketUrl(
   params: GetWebSocketUrlParams = { service: "turbo-streams" }
 ): string {
   return serviceUrl({
-    service: params.service,
-    type: "absolute",
+    ...params,
+    type: params.type ?? "absolute",
   })
     .replace("http://", "ws://")
     .replace("https://", "wss://");
@@ -72,6 +72,8 @@ export type SendByWebSocketTarget = XOR<BySocketId, ByGroupId>;
 /**
  * Params for configuring web socket urls
  */
-export interface GetWebSocketUrlParams {
-  readonly service: string;
-}
+export type GetWebSocketUrlParams = Omit<ServiceUrlParams, "params"> & {
+  params?: {
+    groupId?: string;
+  };
+};
