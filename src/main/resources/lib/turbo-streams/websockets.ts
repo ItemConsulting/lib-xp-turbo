@@ -13,12 +13,12 @@ export function getUsersPersonalGroupName(): string {
 /**
  * Returns a url to a service, but using the web socket protocols
  */
-export function getWebSocketUrl(
-  params: GetWebSocketUrlParams = { service: "turbo-streams" }
-): string {
+export function getWebSocketUrl(params: GetWebSocketUrlParams = {}): string {
   return serviceUrl({
-    ...params,
+    service: params.service ?? "turbo-streams",
     type: params.type ?? "absolute",
+    params: params.params,
+    application: params.application,
   })
     .replace("http://", "ws://")
     .replace("https://", "wss://");
@@ -72,7 +72,10 @@ export type SendByWebSocketTarget = XOR<BySocketId, ByGroupId>;
 /**
  * Params for configuring web socket urls
  */
-export type GetWebSocketUrlParams = Omit<ServiceUrlParams, "params"> & {
+export type GetWebSocketUrlParams = Omit<
+  Partial<ServiceUrlParams>,
+  "params"
+> & {
   params?: {
     groupId?: string;
   };
