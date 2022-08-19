@@ -138,4 +138,8 @@ export type TurboStreamsRemoveParams = Omit<TurboStreamRemoveAction, "action"> &
   SendByWebSocketTarget;
 
 export * from "./actions";
-export { getUsersPersonalGroupName, getWebSocketUrl } from "./websockets";
+export {
+  getUsersPersonalGroupName,
+  getWebSocketUrl,
+  SERVICE_NAME_TURBO_STREAMS,
+} from "./websockets";

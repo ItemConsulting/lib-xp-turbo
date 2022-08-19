@@ -3,6 +3,11 @@ import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
 
 /**
+ * The name of the service created by this library
+ */
+export const SERVICE_NAME_TURBO_STREAMS = "turbo-streams";
+
+/**
  * Returns a websocket group name specific for the user, based on the user session number
  */
 export function getUsersPersonalGroupName(): string {
@@ -15,7 +20,7 @@ export function getUsersPersonalGroupName(): string {
  */
 export function getWebSocketUrl(params: GetWebSocketUrlParams = {}): string {
   return serviceUrl({
-    service: params.service ?? "turbo-streams",
+    service: params.service ?? SERVICE_NAME_TURBO_STREAMS,
     type: params.type ?? "absolute",
     params: params.params,
     application: params.application,
