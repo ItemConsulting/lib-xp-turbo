@@ -62,7 +62,7 @@ want to do.
 
   <!-- 2. Imported as a webjar (see above) -->
   <script
-    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.1.0/dist/turbo.es2017-umd.js'})}"
+    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.2.2/dist/turbo.es2017-umd.js'})}"
     defer>
   </script>
 
