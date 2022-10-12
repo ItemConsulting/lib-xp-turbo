@@ -7,9 +7,12 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "types": [
-      "enonic-types"
-    ]
+    "baseUrl": "./",
+    "paths": {
+      "/lib/xp/*": ["node_modules/@enonic-types/lib-*"]
+    },
+    "declaration": true,
+    "declarationDir": "build/types"
   },
   "types": [
     "types"

@@ -4,6 +4,7 @@ import {
   type TurboStreamRemoveAction,
   type TurboStreamChangeAction,
 } from "./actions";
+import type { Request } from "@item-enonic-types/global/controller";
 
 /**
  * Default group that all websocket connections in the "turbo-stream" service is registered to
@@ -115,7 +116,7 @@ export function after(params: TurboStreamsParams): void {
 /**
  * Checks the request header if the response can be of mime type "text/vnd.turbo-stream.html"
  */
-export function acceptTurboStreams(req: XP.Request): boolean {
+export function acceptTurboStreams(req: Request): boolean {
   return req.headers["Accept"]?.indexOf(MIME_TYPE_TURBO_STREAMS) !== -1;
 }
 

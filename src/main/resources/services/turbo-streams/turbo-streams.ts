@@ -3,10 +3,20 @@ import {
   getUsersPersonalGroupName,
 } from "../../lib/turbo-streams";
 import { addToGroup } from "/lib/xp/websocket";
+import type {
+  Request,
+  Response,
+  WebSocketEvent,
+} from "@item-enonic-types/global/controller";
 
-export function get(
-  req: XP.Request
-): XP.Response | XP.WebSocketResponse<WebSocketData> {
+interface WebSocketResponse<WebSocketData = {}> {
+  webSocket: {
+    data?: WebSocketData;
+    subProtocols?: ReadonlyArray<string>;
+  };
+}
+
+export function get(req: Request): Response | WebSocketResponse<WebSocketData> {
   if (!req.webSocket) {
     return {
       status: 404,
@@ -23,7 +33,7 @@ export function get(
   };
 }
 
-export function webSocketEvent(event: XP.WebSocketEvent<WebSocketData>): void {
+export function webSocketEvent(event: WebSocketEvent<WebSocketData>): void {
   if (event.type == "open") {
     addToGroup(event.data.usersPersonalGroupName, event.session.id);
     addToGroup(DEFAULT_GROUP_ID, event.session.id);

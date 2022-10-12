@@ -1,4 +1,3 @@
-import { type XOR } from "enonic-types/types";
 import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
 
@@ -72,7 +71,7 @@ interface ByGroupId {
 /**
  * Object with either "socketId" or "groupId" parameter
  */
-export type SendByWebSocketTarget = XOR<BySocketId, ByGroupId>;
+export type SendByWebSocketTarget = BySocketId | ByGroupId;
 
 /**
  * Params for configuring web socket urls

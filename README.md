@@ -18,8 +18,24 @@ repositories {
 dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
-  include 'no.item:lib-xp-turbo:1.0.2'
-  webjar "org.webjars.npm:hotwired__turbo:7.1.0"
+  include 'no.item:lib-xp-turbo:1.0.3'
+  webjar "org.webjars.npm:hotwired__turbo:7.2.2"
+}
+```
+
+### TypeScript
+
+You can add the following changes to your *tsconfig.json* to get TypeScript-support.
+
+```diff
+{
+  "compilerOptions": {
++   "baseUrl": "./",
++   "paths": {
++     "/lib/xp/*": ["./node_modules/@enonic-types/lib-*"],
++     "/lib/*": [ "./node_modules/@item-enonic-types/lib-*" ,"./src/main/resources/lib/*"],
++   }
+  }
 }
 ```
 
@@ -230,12 +246,6 @@ exports.post = function(req) {
   }
 }
 ```
-
-### TypeScript
-
-If you are using TypeScript in your application,
-[types](https://github.com/ItemConsulting/enonic-types/blob/main/src/turbo.ts) for this library has been added to the
-[*enonic-types*](https://github.com/ItemConsulting/enonic-types) library.
 
 ### Building
 

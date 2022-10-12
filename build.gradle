@@ -1,7 +1,7 @@
 plugins {
   id 'java'
   id 'maven-publish'
-  id "com.github.node-gradle.node" version '3.1.0'
+  id "com.github.node-gradle.node" version '3.4.0'
   id 'com.enonic.xp.base' version '3.1.0'
 }
 
@@ -13,9 +13,9 @@ dependencies {
 }
 
 repositories {
-  mavenLocal()
-  jcenter()
+  mavenCentral()
   xp.enonicRepo()
+  maven { url 'https://jitpack.io' }
 }
 
 node {
