@@ -1,5 +1,6 @@
-import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
+import { serviceUrl } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
+import type { ServiceUrlParams } from "@enonic-types/lib-portal";
 
 /**
  * The name of the service created by this library
@@ -20,21 +21,16 @@ export function getUsersPersonalGroupName(): string {
 export function getWebSocketUrl(params: GetWebSocketUrlParams = {}): string {
   return serviceUrl({
     service: params.service ?? SERVICE_NAME_TURBO_STREAMS,
-    type: params.type ?? "absolute",
+    type: "websocket",
     params: params.params,
     application: params.application,
-  })
-    .replace("http://", "ws://")
-    .replace("https://", "wss://");
+  });
 }
 
 /**
  * Sends some content over web socket, either based on `socketId` or `groupId`.
  */
-export function sendByWebSocket(
-  params: SendByWebSocketTarget,
-  content: string
-): void {
+export function sendByWebSocket(params: SendByWebSocketTarget, content: string): void {
   if (isSingleMessage(params)) {
     send(params.socketId, content);
   } else {
@@ -59,7 +55,7 @@ interface BySocketId {
 }
 
 /**
- * Send message trough a group of sockets specified by the group id
+ * Send message through a group of sockets specified by the group id
  */
 interface ByGroupId {
   /**
@@ -76,10 +72,7 @@ export type SendByWebSocketTarget = BySocketId | ByGroupId;
 /**
  * Params for configuring web socket urls
  */
-export type GetWebSocketUrlParams = Omit<
-  Partial<ServiceUrlParams>,
-  "params"
-> & {
+export type GetWebSocketUrlParams = Omit<Partial<ServiceUrlParams>, "params"> & {
   params?: {
     groupId?: string;
   };

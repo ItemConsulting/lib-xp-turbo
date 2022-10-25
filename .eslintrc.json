@@ -15,9 +15,6 @@
     "exports": true,
     "resolve": true,
     "app": true,
-    "fetch": true,
-    "document": true,
-    "window": true,
     "__": true
   }
 }

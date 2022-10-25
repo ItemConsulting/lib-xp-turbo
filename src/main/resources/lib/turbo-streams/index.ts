@@ -1,10 +1,6 @@
 import { sendByWebSocket, type SendByWebSocketTarget } from "./websockets";
-import {
-  serialize,
-  type TurboStreamRemoveAction,
-  type TurboStreamChangeAction,
-} from "./actions";
-import type { Request } from "@item-enonic-types/global/controller";
+import { serialize, type TurboStreamRemoveAction, type TurboStreamChangeAction, TurboStreamAction } from "./actions";
+import type { Request, Response } from "@item-enonic-types/global/controller";
 
 /**
  * Default group that all websocket connections in the "turbo-stream" service is registered to
@@ -17,6 +13,11 @@ export const DEFAULT_GROUP_ID = "turbo-streams";
 export const MIME_TYPE_TURBO_STREAMS = "text/vnd.turbo-stream.html";
 
 /**
+ * A header field that can be temporarily used to send a payload to the "turbo-streams" processor
+ */
+export const HEADER_KEY_TURBO = "x-turbo";
+
+/**
  * Append some markup to a target id in the dom over web socket
  */
 export function append(params: TurboStreamsParams): void {
@@ -26,6 +27,7 @@ export function append(params: TurboStreamsParams): void {
       action: "append",
       content: params.content,
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -40,6 +42,7 @@ export function prepend(params: TurboStreamsParams): void {
       action: "prepend",
       content: params.content,
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -54,6 +57,7 @@ export function replace(params: TurboStreamsParams): void {
       action: "replace",
       content: params.content,
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -68,6 +72,7 @@ export function update(params: TurboStreamsParams): void {
       action: "update",
       content: params.content,
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -81,6 +86,7 @@ export function remove(params: TurboStreamsRemoveParams): void {
     serialize({
       action: "remove",
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -95,6 +101,7 @@ export function before(params: TurboStreamsParams): void {
       action: "before",
       content: params.content,
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -109,6 +116,7 @@ export function after(params: TurboStreamsParams): void {
       action: "after",
       content: params.content,
       target: params.target,
+      targets: params.targets,
     })
   );
 }
@@ -121,13 +129,23 @@ export function acceptTurboStreams(req: Request): boolean {
 }
 
 /**
+ * Creates a response for a part that can be processed by the "turbo-streams" processor
+ */
+export function createTurboStreamResponse(actions: TurboStreamAction | Array<TurboStreamAction>): Response {
+  return {
+    headers: {
+      [HEADER_KEY_TURBO]: serialize(actions),
+    },
+  };
+}
+
+/**
  * Parameters for "append", "prepend" and "replace". It takes either "socketId" or "groupId".
  *
  * If neither is specified it falls back to the default group. The default group has a name based on the session
  * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
  */
-export type TurboStreamsParams = Omit<TurboStreamChangeAction, "action"> &
-  SendByWebSocketTarget;
+export type TurboStreamsParams = Omit<TurboStreamChangeAction, "action"> & SendByWebSocketTarget;
 
 /**
  * Parameters for "remove". It takes either "socketId" or "groupId".
@@ -135,12 +153,7 @@ export type TurboStreamsParams = Omit<TurboStreamChangeAction, "action"> &
  * If neither is specified it falls back to the default group. The default group has a name based on the session
  * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
  */
-export type TurboStreamsRemoveParams = Omit<TurboStreamRemoveAction, "action"> &
-  SendByWebSocketTarget;
+export type TurboStreamsRemoveParams = Omit<TurboStreamRemoveAction, "action"> & SendByWebSocketTarget;
 
 export * from "./actions";
-export {
-  getUsersPersonalGroupName,
-  getWebSocketUrl,
-  SERVICE_NAME_TURBO_STREAMS,
-} from "./websockets";
+export { getUsersPersonalGroupName, getWebSocketUrl, SERVICE_NAME_TURBO_STREAMS } from "./websockets";

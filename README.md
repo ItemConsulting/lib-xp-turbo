@@ -19,7 +19,7 @@ dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
   include 'no.item:lib-xp-turbo:1.0.3'
-  webjar "org.webjars.npm:hotwired__turbo:7.2.2"
+  webjar "org.webjars.npm:hotwired__turbo:7.2.4"
 }
 ```
 
@@ -62,7 +62,7 @@ want to do.
 
   <!-- 2. Imported as a webjar (see above) -->
   <script
-    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.2.2/dist/turbo.es2017-umd.js'})}"
+    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.2.4/dist/turbo.es2017-umd.js'})}"
     defer>
   </script>
 
@@ -221,31 +221,42 @@ var turboStreamsLib = require('/lib/turbo-streams');
 exports.post = function(req) {
   // if "Accept" header includes mime type
   if (turboStreamsLib.acceptTurboStreams(req)) {
-    return {
-      status: 200,
-      contentType: turboStreamsLib.MIME_TYPE_TURBO_STREAMS,
-      // returns two actions to be performed on the dom on the page
-      body: turboStreamsLib.serialize([
-        {
-          action: 'append',
-          target: 'my-alert-wrapper-id',
-          content: '<div role="alert">Something went wrong</div>'
-        },
-        {
-          action: 'replace',
-          target: 'status-id',
-          content: '<div>Status has changed</div>'
-        }
-      ])
-    }
+    return turboStreamsLib.createTurboStreamResponse([
+      {
+        action: 'append',
+        target: 'my-alert-wrapper-id',
+        content: '<div role="alert">Something went wrong</div>'
+      },
+      {
+        action: 'replace',
+        target: 'status-id',
+        content: '<div>Status has changed</div>'
+      }
+    ]);
   } else {
     return {
       status: 200,
       body: "This page doesn't accept Turbo Streams"
-    }
+    };
   }
 }
 ```
+
+Use the "turbo-streams" [response processor](https://developer.enonic.com/docs/xp/stable/cms/response-processors) 
+– included in this library – to make the response body from a *part* become the whole payload returned to the browser.
+
+You need to configure your *site.xml* with the following:
+
+```diff
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
++ <processors>
++   <response-processor name="turbo-streams" order="10" />
++ </processors>
+</site>
+```
+
+> **Note** Behind the scenes, a header field `"x-turbo"` is used to pass the response body from the part to the response processor
 
 ### Building
 
