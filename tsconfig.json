@@ -7,6 +7,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
+    "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
       "/lib/xp/*": ["node_modules/@enonic-types/lib-*"]
