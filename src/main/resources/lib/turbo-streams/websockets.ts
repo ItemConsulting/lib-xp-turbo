@@ -1,6 +1,5 @@
-import { serviceUrl } from "/lib/xp/portal";
+import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
-import type { ServiceUrlParams } from "@enonic-types/lib-portal";
 
 /**
  * The name of the service created by this library

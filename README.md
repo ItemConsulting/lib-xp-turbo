@@ -18,8 +18,8 @@ repositories {
 dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
-  include 'no.item:lib-xp-turbo:1.0.3'
-  webjar "org.webjars.npm:hotwired__turbo:7.2.4"
+  include 'no.item:lib-xp-turbo:1.0.5'
+  webjar "org.webjars.npm:hotwired__turbo:7.3.0"
 }
 ```
 
@@ -43,59 +43,25 @@ You can add the following changes to your *tsconfig.json* to get TypeScript-supp
 
 ### Page template
 
-**Warning:** Including the *turbo.es5-umd.min.js* file will affect the basic functionality of your page (like navigation).
+**Warning:** Including the *turbo.es2017-esm.js* file will affect the basic functionality of your page (like navigation).
 Read the [Turbo documentation](https://turbo.hotwire.dev/handbook/introduction) to make sure that this is something you
 want to do.
 
- 1. You need to place the  `turboStreamUrl` JavaScript variable on the *global scope* so that the initialization script
-    has access to it.
- 2. Import the turbo script in your page html (has to be in `<head>`).
- 3. A simple [initialization script](./src/main/resources/assets/init-turbo-streams.js) is included with this library.
-    Note that this JavaScript code can't be inlined, but needs to be included as a script file because of how Turbo works.
+
+ 1. Import the turbo script in your page html (has to be in `<head>`).
+ 2. Set the `"turbo-streams"` service to be the `<turbo-stream-source>` of the page. (Has to be in `<body>`).
 
 ```html
 <head>
-  <!-- 1. -->
-  <script data-th-inline="javascript">
-    var turboStreamUrl = /*[[${turboStreamUrl}]]*/ undefined;
-  </script>
-
-  <!-- 2. Imported as a webjar (see above) -->
-  <script
-    data-th-src="${portal.assetUrl({'_path=hotwired__turbo/7.2.4/dist/turbo.es2017-umd.js'})}"
-    defer>
-  </script>
-
-  <!-- 3. -->
-  <script
-    data-th-src="${portal.assetUrl({'_path=init-turbo-streams.js'})}"
-    defer>
-  </script>
+  <!-- 1. Imported as a webjar (see above) -->
+  <script type="module" src="[@assetUrl path='hotwired__turbo/7.3.0/dist/turbo.es2017-esm.js'/]"></script>
 </head>
+<body>
+  <!-- 2. -->
+  <turbo-stream-source src="[@serviceUrl service='turbo-streams' type='websocket'/]"></turbo-stream-source>
+</body>
 ```
 
-### Page controller
-
-You need to provide the template above with the `turboStreamUrl` variable. You can either use `getWebSocketUrl()`
-function without parameters, and get the default web socket provided by this library. Or you can use your own
-service like this: `getWebSocketUrl({ service: 'myservice' })`:
-
-```javascript
-var turboStreamsLib = require("/lib/turbo-streams");
-
-var view = resolve("mypage.html")
-
-exports.get = function(req) {
-  var thymeleafParams = {
-    turboStreamUrl: turboStreamsLib.getWebSocketUrl()
-  };
-
-  return {
-    status: 200,
-    body: thymeleafLib.render(view, thymeleafParams),
-  };
-}
-```
 ## Usage
 
 You can now directly manipulate the dom from serverside JavaScript over websocket, using following functions:
@@ -208,7 +174,7 @@ turboStreamsLib.append({
 
 ### Turbo Streams over HTTP
 
-It is also possible to return turbo streams over http with the `Content-Type` `"text/vnd.turbo-stream.html"`.
+It is also possible to return turbo streams over http with the `Content-Type` `"text/vnd.turbo-stream.html; charset=utf-8"`.
 
 This can for instance be returned by a form submission to perform multiple actions the web page's dom.
 

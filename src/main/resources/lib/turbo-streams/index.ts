@@ -10,7 +10,7 @@ export const DEFAULT_GROUP_ID = "turbo-streams";
 /**
  * Mime type to use when returning Turbo Streams over HTTP
  */
-export const MIME_TYPE_TURBO_STREAMS = "text/vnd.turbo-stream.html";
+export const MIME_TYPE_TURBO_STREAMS = "text/vnd.turbo-stream.html; charset=utf-8";
 
 /**
  * A header field that can be temporarily used to send a payload to the "turbo-streams" processor
@@ -28,7 +28,7 @@ export function append(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
@@ -43,7 +43,7 @@ export function prepend(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
@@ -58,7 +58,7 @@ export function replace(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
@@ -73,7 +73,7 @@ export function update(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
@@ -87,7 +87,7 @@ export function remove(params: TurboStreamsRemoveParams): void {
       action: "remove",
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
@@ -102,7 +102,7 @@ export function before(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
@@ -117,7 +117,7 @@ export function after(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
-    })
+    }),
   );
 }
 
