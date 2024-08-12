@@ -5,6 +5,7 @@ import {
   type TurboStreamChangeAction,
   TurboStreamAction,
   TurboStreamRefreshAction,
+  TurboStreamMorphableAction,
 } from "./actions";
 import type { Request, Response } from "@item-enonic-types/global/controller";
 
@@ -56,7 +57,7 @@ export function prepend(params: TurboStreamsParams): void {
 /**
  * Replace some markup at a target id in the dom over web socket
  */
-export function replace(params: TurboStreamsParams): void {
+export function replace(params: TypeStreamsMorhphableParams): void {
   sendByWebSocket(
     params,
     serialize({
@@ -64,6 +65,7 @@ export function replace(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
+      method: params.method,
     }),
   );
 }
@@ -71,7 +73,7 @@ export function replace(params: TurboStreamsParams): void {
 /**
  * Updates some markup inside a target with the id in the dom over web socket
  */
-export function update(params: TurboStreamsParams): void {
+export function update(params: TypeStreamsMorhphableParams): void {
   sendByWebSocket(
     params,
     serialize({
@@ -79,6 +81,7 @@ export function update(params: TurboStreamsParams): void {
       content: params.content,
       target: params.target,
       targets: params.targets,
+      method: params.method,
     }),
   );
 }
@@ -167,14 +170,28 @@ export function createTurboStreamResponse(actions: TurboStreamAction | Array<Tur
 export type TurboStreamsParams = Omit<TurboStreamChangeAction, "action"> & SendByWebSocketTarget;
 
 /**
+ * Parameters for "replace" and "update". It takes either "socketId" or "groupId".
+ *
+ * If neither is specified it falls back to the default group. The default group has a name based on the session
+ * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
+ */
+export type TypeStreamsMorhphableParams = Omit<TurboStreamMorphableAction, "action"> & SendByWebSocketTarget;
+
+/**
+ * Parameters for "refresh". It takes either "socketId" or "groupId".
+ *
+ * If neither is specified it falls back to the default group. The default group has a name based on the session
+ * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
+ */
+export type TypeStreamsRefreshParams = Omit<TurboStreamRefreshAction, "action"> & SendByWebSocketTarget;
+
+/**
  * Parameters for "remove". It takes either "socketId" or "groupId".
  *
  * If neither is specified it falls back to the default group. The default group has a name based on the session
  * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
  */
 export type TurboStreamsRemoveParams = Omit<TurboStreamRemoveAction, "action"> & SendByWebSocketTarget;
-
-export type TypeStreamsRefreshParams = Omit<TurboStreamRefreshAction, "action"> & SendByWebSocketTarget;
 
 export * from "./actions";
 export { getUsersPersonalGroupName, getWebSocketUrl, SERVICE_NAME_TURBO_STREAMS } from "./websockets";
