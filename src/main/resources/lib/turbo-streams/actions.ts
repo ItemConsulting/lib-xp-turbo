@@ -4,7 +4,7 @@ export type TurboStreamChangeAction = {
   /**
    * Action to perform
    */
-  readonly action: Exclude<(typeof actionNames)[number], "remove" | "refresh">;
+  readonly action: Exclude<(typeof actionNames)[number], "remove" | "refresh" | "replace" | "update">;
 
   /**
    * Dom ID to update
@@ -20,6 +20,33 @@ export type TurboStreamChangeAction = {
    * The new content to insert into the dom
    */
   readonly content: string;
+};
+
+export type TurboStreamMorphableAction = {
+  /**
+   * Action to perform
+   */
+  readonly action: "replace" | "update";
+
+  /**
+   * Dom ID to update
+   */
+  readonly target?: string;
+
+  /**
+   * CSS Query selector to update
+   */
+  readonly targets?: string;
+
+  /**
+   * The new content to insert into the dom
+   */
+  readonly content: string;
+
+  /**
+   * Set to "morph" to only morph the children of the element designated by the target dom id.
+   */
+  readonly method?: "morph";
 };
 
 export type TurboStreamRemoveAction = {
@@ -54,7 +81,11 @@ export type TurboStreamRefreshAction = {
 /**
  * Type that can be serialized into a turbo stream action frame
  */
-export type TurboStreamAction = TurboStreamChangeAction | TurboStreamRemoveAction | TurboStreamRefreshAction;
+export type TurboStreamAction =
+  | TurboStreamChangeAction
+  | TurboStreamRemoveAction
+  | TurboStreamRefreshAction
+  | TurboStreamMorphableAction;
 
 /**
  * Guard that verifies that an object is of type TurboStreamAction
@@ -100,13 +131,13 @@ function serializeOne(action: TurboStreamAction): string {
     case "after":
       return action.target
         ? `
-<turbo-stream action="${action.action}" target="${action.target}">
+<turbo-stream action="${action.action}" target="${action.target}${getMorphAttribute(action)}">
   <template>
     ${action.content}
   </template>
 </turbo-stream>`.trim()
         : `
-<turbo-stream action="${action.action}" targets="${action.targets}">
+<turbo-stream action="${action.action}" targets="${action.targets}${getMorphAttribute(action)}">
   <template>
     ${action.content}
   </template>
@@ -114,4 +145,10 @@ function serializeOne(action: TurboStreamAction): string {
     default:
       return "";
   }
+}
+
+function getMorphAttribute(action: TurboStreamAction): string {
+  return (action.action === "replace" || action.action === "update") && action.method === "morph"
+    ? ` action="morph"`
+    : "";
 }
