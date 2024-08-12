@@ -4,7 +4,7 @@ export type TurboStreamChangeAction = {
   /**
    * Action to perform
    */
-  readonly action: "append" | "prepend" | "replace" | "update" | "before" | "after";
+  readonly action: Exclude<(typeof actionNames)[number], "remove" | "refresh">;
 
   /**
    * Dom ID to update
@@ -77,7 +77,7 @@ export function serialize(action: TurboStreamAction): string;
 export function serialize(actions: ReadonlyArray<TurboStreamAction>): string;
 export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string;
 export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string {
-  return Array.isArray(actions) ? actions.map(serializeOne).join("\n") : serializeOne(actions);
+  return actions instanceof Array ? actions.map(serializeOne).join("\n") : serializeOne(actions);
 }
 
 function serializeOne(action: TurboStreamAction): string {
