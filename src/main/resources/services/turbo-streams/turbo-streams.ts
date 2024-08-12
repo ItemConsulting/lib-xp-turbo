@@ -2,7 +2,7 @@ import { DEFAULT_GROUP_ID, getUsersPersonalGroupName } from "../../lib/turbo-str
 import { addToGroup } from "/lib/xp/websocket";
 import type { Request, Response, WebSocketEvent } from "@item-enonic-types/global/controller";
 
-interface WebSocketResponse<WebSocketData = {}> {
+interface WebSocketResponse<WebSocketData = Record<PropertyKey, never>> {
   webSocket: {
     data?: WebSocketData;
     subProtocols?: ReadonlyArray<string>;

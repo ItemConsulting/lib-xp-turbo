@@ -72,13 +72,13 @@ function serializeOne(action: TurboStreamAction): string {
       ? `<turbo-stream action="remove" target="${action.target}"></turbo-stream>`
       : `<turbo-stream action="remove" targets="${action.targets}"></turbo-stream>`
     : action.target
-    ? `
+      ? `
 <turbo-stream action="${action.action}" target="${action.target}">
   <template>
     ${action.content}
   </template>
 </turbo-stream>`.trim()
-    : `
+      : `
 <turbo-stream action="${action.action}" targets="${action.targets}">
   <template>
     ${action.content}

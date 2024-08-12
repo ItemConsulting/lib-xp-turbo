@@ -226,7 +226,7 @@ You need to configure your *site.xml* with the following:
 
 ### Building
 
-To build he project run the following code
+To build he project run the following command
 
 ```bash
 ./gradlew build
