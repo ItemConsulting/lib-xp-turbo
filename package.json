@@ -14,7 +14,9 @@
     "dist": "run-p -c dist:*",
     "lint": "eslint --fix 'src/**/*.ts'",
     "prepublishOnly": "tsc --project src/main/resources/tsconfig.server.json --declarationDir build/types --emitDeclarationOnly true --declaration true && cp -r ./build/types/lib/turbo-streams/* .",
-    "postpublish": "rm ./*.d.ts"
+    "postpublish": "rm ./*.d.ts",
+    "release": "pnpm run build && changeset publish",
+    "versioning": "pnpm changeset version && NEW_VERSION=$(node -p \"require('./package.json').version\") && sed -i \"s/version.*/version = ${NEW_VERSION}/\" gradle.properties"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -46,9 +48,5 @@
   },
   "browserslist": [
     "extends browserslist-config-enonic"
-  ],
-  "engines": {
-    "node": ">= 16.13.1 || >=18.0.0",
-    "npm": ">= 8.1.2 || >= 9.6.7"
-  }
+  ]
 }
