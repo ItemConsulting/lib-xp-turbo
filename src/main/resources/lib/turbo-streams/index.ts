@@ -1,5 +1,11 @@
 import { sendByWebSocket, type SendByWebSocketTarget } from "./websockets";
-import { serialize, type TurboStreamRemoveAction, type TurboStreamChangeAction, TurboStreamAction } from "./actions";
+import {
+  serialize,
+  type TurboStreamRemoveAction,
+  type TurboStreamChangeAction,
+  TurboStreamAction,
+  TurboStreamRefreshAction,
+} from "./actions";
 import type { Request, Response } from "@item-enonic-types/global/controller";
 
 /**
@@ -122,6 +128,19 @@ export function after(params: TurboStreamsParams): void {
 }
 
 /**
+ * Initiates a Page Refresh to render new content with morphing.
+ */
+export function refresh(params: TypeStreamsRefreshParams): void {
+  sendByWebSocket(
+    params,
+    serialize({
+      action: "refresh",
+      requestId: params.requestId,
+    }),
+  );
+}
+
+/**
  * Checks the request header if the response can be of mime type "text/vnd.turbo-stream.html"
  */
 export function acceptTurboStreams(req: Request): boolean {
@@ -154,6 +173,8 @@ export type TurboStreamsParams = Omit<TurboStreamChangeAction, "action"> & SendB
  * key from the request. If the "turbo-streams"-service was used this is the group registered with the web socket.
  */
 export type TurboStreamsRemoveParams = Omit<TurboStreamRemoveAction, "action"> & SendByWebSocketTarget;
+
+export type TypeStreamsRefreshParams = Omit<TurboStreamRefreshAction, "action"> & SendByWebSocketTarget;
 
 export * from "./actions";
 export { getUsersPersonalGroupName, getWebSocketUrl, SERVICE_NAME_TURBO_STREAMS } from "./websockets";
