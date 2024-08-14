@@ -3,6 +3,9 @@
   "version": "1.1.1",
   "description": "Type definitions for lib-xp-turbo",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "*.d.ts",
     "tsconfig.json"
