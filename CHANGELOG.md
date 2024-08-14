@@ -4,11 +4,5 @@
 
 ### Minor Changes
 
-- fc8a100: Add support for [method="morph"] for update and replace actions
+- fc8a100: Add support for `[method="morph"]` for update and replace actions
 - 85db4ee: Add Turbo Stream support for Refresh Action
-
-## 1.1.0
-
-### Minor Changes
-
-- testing
