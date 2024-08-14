@@ -18,8 +18,8 @@ repositories {
 dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
-  include 'no.item:lib-xp-turbo:1.0.5'
-  webjar "org.webjars.npm:hotwired__turbo:7.3.0"
+  include 'no.item:lib-xp-turbo:1.1.0'
+  webjar "org.webjars.npm:hotwired__turbo:8.0.5"
 }
 ```
 
@@ -43,9 +43,10 @@ You can add the following changes to your *tsconfig.json* to get TypeScript-supp
 
 ### Page template
 
-**Warning:** Including the *turbo.es2017-esm.js* file will affect the basic functionality of your page (like navigation).
-Read the [Turbo documentation](https://turbo.hotwire.dev/handbook/introduction) to make sure that this is something you
-want to do.
+> [!CAUTION]
+> Including the *turbo.es2017-esm.js* file will affect the basic functionality of your page (like navigation).
+> Read the [Turbo documentation](https://turbo.hotwire.dev/handbook/introduction) to make sure that this is something you
+> want to do.
 
 
  1. Import the turbo script in your page html (has to be in `<head>`).
@@ -54,7 +55,7 @@ want to do.
 ```html
 <head>
   <!-- 1. Imported as a webjar (see above) -->
-  <script type="module" src="[@assetUrl path='hotwired__turbo/7.3.0/dist/turbo.es2017-esm.js'/]"></script>
+  <script type="module" src="[@assetUrl path='hotwired__turbo/8.0.5/dist/turbo.es2017-esm.js'/]"></script>
 </head>
 <body>
   <!-- 2. -->
@@ -72,6 +73,7 @@ You can now directly manipulate the dom from serverside JavaScript over websocke
  - `remove({ target });`
  - `before({ target, content });`
  - `after({ target, content });`
+ - `refresh({ requestId });`
 
 ### Example
 
@@ -117,6 +119,11 @@ turboStreamsLib.before({
 turboStreamsLib.after({
   target: 'my-alert-id',
   content: '<div role="alert">Something else went wrong</div>'
+});
+
+// Initiates a Page Refresh to render new content with morphing.
+turboStreamsLib.after({
+  requestId: 'my-refresh-id',
 });
 ```
 
@@ -222,11 +229,34 @@ You need to configure your *site.xml* with the following:
 </site>
 ```
 
-> **Note** Behind the scenes, a header field `"x-turbo"` is used to pass the response body from the part to the response processor
+> [!NOTE]
+> Behind the scenes, a header field `"x-turbo"` is used to pass the response body from the part to the response processor
+
+## Development
+
+### Changesets
+
+[Changesets](https://changesets-docs.vercel.app/) is a tool that helps developers version the software, and create
+changelogs.
+
+Please include Changesets in your PRs.
+
+To install Changesets run the following command:
+
+```bash
+npm install -g @changesets/cli
+```
+
+
+Run the following command and you will be prompted to create a changelog message and tell it which level to bump the next version:
+
+```bash
+changeset
+```
 
 ### Building
 
-To build he project run the following command
+To build he project run the following command:
 
 ```bash
 ./gradlew build
