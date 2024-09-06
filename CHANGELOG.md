@@ -1,5 +1,11 @@
 # @item-enonic-types/lib-turbo-streams
 
+## 1.1.2
+
+### Patch Changes
+
+- a952f78: Fixed bug where the header became x-tmp-turbo
+
 ## 1.1.1
 
 ### Patch Changes
