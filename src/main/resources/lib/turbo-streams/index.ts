@@ -22,7 +22,7 @@ export const MIME_TYPE_TURBO_STREAMS = "text/vnd.turbo-stream.html; charset=utf-
 /**
  * A header field that can be temporarily used to send a payload to the "turbo-streams" processor
  */
-export const HEADER_KEY_TURBO = "x-turbo";
+export const HEADER_KEY_TURBO = "x-tmp-turbo";
 
 /**
  * Append some markup to a target id in the dom over web socket
