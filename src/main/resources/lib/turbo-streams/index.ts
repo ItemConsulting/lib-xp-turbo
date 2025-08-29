@@ -7,7 +7,7 @@ import {
   TurboStreamRefreshAction,
   TurboStreamMorphableAction,
 } from "./actions";
-import type { Request, Response } from "@item-enonic-types/global/controller";
+import type { Request, Response } from "@enonic-types/core";
 
 /**
  * Default group that all websocket connections in the "turbo-stream" service is registered to

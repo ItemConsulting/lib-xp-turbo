@@ -1,15 +1,24 @@
-import { DEFAULT_GROUP_ID, getUsersPersonalGroupName } from "../../lib/turbo-streams";
+import { DEFAULT_GROUP_ID, getUsersPersonalGroupName } from "/lib/turbo-streams";
 import { addToGroup } from "/lib/xp/websocket";
-import type { Request, Response, WebSocketEvent } from "@item-enonic-types/global/controller";
+import type { Request, Response, WebSocketEvent } from "@enonic-types/core";
 
-interface WebSocketResponse<WebSocketData = Record<PropertyKey, never>> {
+type QueryParams = {
+  groupId?: string;
+};
+
+type WebSocketResponse<WebSocketData = Record<PropertyKey, never>> = {
   webSocket: {
     data?: WebSocketData;
     subProtocols?: ReadonlyArray<string>;
   };
-}
+};
 
-export function get(req: Request): Response | WebSocketResponse<WebSocketData> {
+type WebSocketData = {
+  usersPersonalGroupName: string;
+  groupId?: string;
+};
+
+export function get(req: Request<{ params: QueryParams }>): Response | WebSocketResponse<WebSocketData> {
   if (!req.webSocket) {
     return {
       status: 404,
@@ -35,9 +44,4 @@ export function webSocketEvent(event: WebSocketEvent<WebSocketData>): void {
       addToGroup(event.data.groupId, event.session.id);
     }
   }
-}
-
-interface WebSocketData {
-  usersPersonalGroupName: string;
-  groupId?: string;
 }
