@@ -1,6 +1,6 @@
+import type { Request, Response, WebSocketEvent } from "@enonic-types/core";
 import { DEFAULT_GROUP_ID, getUsersPersonalGroupName } from "/lib/turbo-streams";
 import { addToGroup } from "/lib/xp/websocket";
-import type { Request, Response, WebSocketEvent } from "@enonic-types/core";
 
 type QueryParams = {
   groupId?: string;
@@ -9,7 +9,7 @@ type QueryParams = {
 type WebSocketResponse<WebSocketData = Record<PropertyKey, never>> = {
   webSocket: {
     data?: WebSocketData;
-    subProtocols?: ReadonlyArray<string>;
+    subProtocols?: string[];
   };
 };
 
@@ -36,7 +36,7 @@ export function get(req: Request<{ params: QueryParams }>): Response | WebSocket
 }
 
 export function webSocketEvent(event: WebSocketEvent<WebSocketData>): void {
-  if (event.type == "open") {
+  if (event.type === "open") {
     addToGroup(event.data.usersPersonalGroupName, event.session.id);
     addToGroup(DEFAULT_GROUP_ID, event.session.id);
 

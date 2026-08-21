@@ -1,7 +1,7 @@
 plugins {
   id "java"
   id "maven-publish"
-  id "com.enonic.xp.base" version "3.6.1"
+  id "com.enonic.xp.base" version "3.6.2"
   id "com.github.node-gradle.node"  version "7.1.0"
 }
 
@@ -18,7 +18,7 @@ repositories {
 }
 node {
   download = true
-  version = "22.12.0"
+  version = file(".nvmrc").text.trim()
 }
 
 processResources {
@@ -26,6 +26,7 @@ processResources {
   exclude "**/*.json"
   exclude "**/*.ts"
   exclude "**/*.tsx"
+  includeEmptyDirs false
 }
 
 tasks.register("dev", Exec) {

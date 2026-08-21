@@ -104,8 +104,8 @@ export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
 /**
  * Serializes actions to frames that can be sent over the wire
  */
-export function serialize(actions: TurboStreamAction | ReadonlyArray<TurboStreamAction>): string {
-  return actions instanceof Array ? actions.map(serializeOne).join("\n") : serializeOne(actions);
+export function serialize(actions: TurboStreamAction | TurboStreamAction[]): string {
+  return Array.isArray(actions) ? actions.map(serializeOne).join("\n") : serializeOne(actions);
 }
 
 function serializeOne(action: TurboStreamAction): string {

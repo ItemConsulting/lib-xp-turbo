@@ -8,9 +8,7 @@
   // Specifies an array of filenames or patterns to include in the program.
   // These filenames are resolved relative to the directory containing the
   // tsconfig.json file.
-  "include": [
-    "./**/*.ts",
-  ],
+  "include": ["./**/*.ts"],
 
   // Specifies an array of filenames or patterns that should be skipped when
   // resolving include.
@@ -20,10 +18,7 @@
   // a /// <reference directive, or being specified in the files list.
   // It is not a mechanism that prevents a file from being included in the
   // codebase - it simply changes what the include setting finds.
-  "exclude": [
-    "**/*.d.ts",
-    // "static/**/*.*",
-  ],
+  "exclude": ["**/*.d.ts"],
 
   "compilerOptions": {
     "strict": true,
@@ -32,7 +27,7 @@
     // to the baseUrl if set, or to the tsconfig file itself otherwise.
     "paths": {
       "/lib/xp/*": ["../../../node_modules/@enonic-types/lib-*"],
-      "/lib/*": ["../../../src/main/resources/lib/*", "../../../node_modules/@item-enonic-types/lib-*"],
+      "/lib/*": ["../../../src/main/resources/lib/*", "../../../node_modules/@item-enonic-types/lib-*"]
     },
     "lib": ["ES5"],
     "skipLibCheck": true,
@@ -52,6 +47,6 @@
       // https://developer.enonic.com/docs/xp/stable/framework/java-bridge
       // __.newBean, __.toNativeObject, __.nullOrValue
       "@enonic-types/global"
-    ],
-  },
+    ]
+  }
 }

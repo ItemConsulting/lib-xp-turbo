@@ -1,4 +1,4 @@
-import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
+import { type ServiceUrlParams, serviceUrl } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
 
 type SessionBean = {
