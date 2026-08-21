@@ -1,13 +1,13 @@
-import { sendByWebSocket, type SendByWebSocketTarget } from "./websockets";
+import type { Request, Response } from "@enonic-types/core";
 import {
   serialize,
-  type TurboStreamRemoveAction,
+  type TurboStreamAction,
   type TurboStreamChangeAction,
-  TurboStreamAction,
-  TurboStreamRefreshAction,
-  TurboStreamMorphableAction,
+  type TurboStreamMorphableAction,
+  type TurboStreamRefreshAction,
+  type TurboStreamRemoveAction,
 } from "./actions";
-import type { Request, Response } from "@item-enonic-types/global/controller";
+import { type SendByWebSocketTarget, sendByWebSocket } from "./websockets";
 
 /**
  * Default group that all websocket connections in the "turbo-stream" service is registered to
@@ -147,13 +147,13 @@ export function refresh(params: TypeStreamsRefreshParams): void {
  * Checks the request header if the response can be of mime type "text/vnd.turbo-stream.html"
  */
 export function acceptTurboStreams(req: Request): boolean {
-  return req.headers["Accept"]?.indexOf(MIME_TYPE_TURBO_STREAMS) !== -1;
+  return !!req.headers.Accept && req.headers.Accept.indexOf(MIME_TYPE_TURBO_STREAMS) !== -1;
 }
 
 /**
  * Creates a response for a part that can be processed by the "turbo-streams" processor
  */
-export function createTurboStreamResponse(actions: TurboStreamAction | Array<TurboStreamAction>): Response {
+export function createTurboStreamResponse(actions: TurboStreamAction | TurboStreamAction[]): Response {
   return {
     headers: {
       [HEADER_KEY_TURBO]: serialize(actions),
@@ -194,4 +194,8 @@ export type TypeStreamsRefreshParams = Omit<TurboStreamRefreshAction, "action"> 
 export type TurboStreamsRemoveParams = Omit<TurboStreamRemoveAction, "action"> & SendByWebSocketTarget;
 
 export * from "./actions";
-export { getUsersPersonalGroupName, getWebSocketUrl, SERVICE_NAME_TURBO_STREAMS } from "./websockets";
+export {
+  getUsersPersonalGroupName,
+  getWebSocketUrl,
+  SERVICE_NAME_TURBO_STREAMS,
+} from "./websockets";

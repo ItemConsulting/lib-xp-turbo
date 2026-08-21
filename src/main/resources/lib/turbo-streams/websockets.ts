@@ -1,5 +1,9 @@
-import { serviceUrl, type ServiceUrlParams } from "/lib/xp/portal";
+import { type ServiceUrlParams, serviceUrl } from "/lib/xp/portal";
 import { send, sendToGroup } from "/lib/xp/websocket";
+
+type SessionBean = {
+  getId(): string;
+};
 
 /**
  * The name of the service created by this library
@@ -10,7 +14,7 @@ export const SERVICE_NAME_TURBO_STREAMS = "turbo-streams";
  * Returns a websocket group name specific for the user, based on the user session number
  */
 export function getUsersPersonalGroupName(): string {
-  const bean = __.newBean("no.item.xp.turbo.SessionBean");
+  const bean = __.newBean<SessionBean>("no.item.xp.turbo.SessionBean");
   return `turbo-streams-${bean.getId()}`;
 }
 
@@ -43,25 +47,25 @@ function isSingleMessage(params: unknown): params is BySocketId {
 }
 
 /**
- * Send message trough a socket specified by a socket id
+ * Send message through a socket specified by a socket id
  */
-interface BySocketId {
+type BySocketId = {
   /**
    * The web socket id to send to.
    * Default value is socket id stored on user session by websocket service
    */
   readonly socketId: string;
-}
+};
 
 /**
  * Send message through a group of sockets specified by the group id
  */
-interface ByGroupId {
+type ByGroupId = {
   /**
    * A group of web socket connections to send content to
    */
   readonly groupId?: string;
-}
+};
 
 /**
  * Object with either "socketId" or "groupId" parameter

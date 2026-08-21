@@ -2,7 +2,9 @@
 
 Enonic XP Library for integrating with [Turbo Streams](https://turbo.hotwire.dev/reference/streams).
 
-[![](https://jitpack.io/v/no.item/lib-xp-turbo.svg)](https://jitpack.io/#no.item/lib-xp-turbo)
+[![](https://repo.itemtest.no/api/badge/latest/snapshots/no/item/lib-xp-turbo)](https://repo.itemtest.no/#/snapshots/no/item/lib-xp-turbo)
+[![](https://img.shields.io/npm/types/%40item-enonic-types%2Flib-turbo-streams)](https://www.npmjs.com/package/@item-enonic-types/lib-turbo-streams)
+
 
 <img src="https://github.com/ItemConsulting/lib-xp-turbo/raw/main/docs/icon.svg?sanitize=true" width="150">
 
@@ -12,14 +14,14 @@ To install this library you may need to add some new dependencies to your app's 
 
 ```groovy
 repositories {
-  maven { url 'https://jitpack.io' }
+  maven { url "https://repo.itemtest.no/releases" }
 }
 
 dependencies {
   include "com.enonic.xp:lib-portal:${xpVersion}"
   include "com.enonic.xp:lib-websocket:${xpVersion}"
-  include 'no.item:lib-xp-turbo:1.1.0'
-  webjar "org.webjars.npm:hotwired__turbo:8.0.5"
+  include 'no.item:lib-xp-turbo:1.2.0'
+  webjar "org.webjars.npm:hotwired__turbo:8.0.13"
 }
 ```
 
@@ -241,22 +243,15 @@ changelogs.
 
 Please include Changesets in your PRs.
 
-To install Changesets run the following command:
-
-```bash
-npm install -g @changesets/cli
-```
-
-
 Run the following command and you will be prompted to create a changelog message and tell it which level to bump the next version:
 
 ```bash
-changeset
+npx changeset
 ```
 
 ### Building
 
-To build he project run the following command:
+To build the project run the following command:
 
 ```bash
 ./gradlew build
@@ -269,7 +264,8 @@ Deploy locally for testing purposes:
 ```bash
 ./gradlew publishToMavenLocal
 ```
-## Deploy to Jitpack
+## Deploy to Maven
 
-Go to the [Jitpack page for lib-xp-turbo](https://jitpack.io/#no.item/lib-xp-turbo) to deploy from Github (after
-[creating a new versioned release](https://github.com/ItemConsulting/lib-xp-turbo/releases/new)).
+```bash
+./gradlew publish -P com.enonic.xp.app.production=true
+```
