@@ -1,0 +1,14 @@
+kind: "API"
+title: "Turbo Streams"
+description: "Server-sent events that push Turbo Stream actions to the browser"
+documentationUrl: "https://github.com/ItemConsulting/lib-xp-turbo"
+
+# Exposed on the Web endpoint at /api/<app>:turbo-streams. Sites don't read `mount`: apiUrl() builds
+# a site-relative URL (…/_/api/<app>:turbo-streams) while rendering a site, which only resolves when
+# the app lists "turbo-streams" under `apis` in its cms/site.yaml.
+mount: ["web"]
+
+# The browser opens the stream for anonymous visitors too. Each stream only joins groups
+# based on its own session, the shared default group, or a group it names itself.
+allow:
+  - "role:system.everyone"

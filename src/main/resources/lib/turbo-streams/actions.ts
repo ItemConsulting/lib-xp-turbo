@@ -1,10 +1,19 @@
-export const actionNames = ["append", "prepend", "replace", "update", "before", "after", "remove", "refresh"] as const;
+export const NAMES_ACTIONS = [
+  "append",
+  "prepend",
+  "replace",
+  "update",
+  "before",
+  "after",
+  "remove",
+  "refresh",
+] as const;
 
 export type TurboStreamChangeAction = {
   /**
    * Action to perform
    */
-  readonly action: Exclude<(typeof actionNames)[number], "remove" | "refresh" | "replace" | "update">;
+  readonly action: Exclude<(typeof NAMES_ACTIONS)[number], "remove" | "refresh" | "replace" | "update">;
 
   /**
    * Dom ID to update
@@ -44,7 +53,8 @@ export type TurboStreamMorphableAction = {
   readonly content: string;
 
   /**
-   * Set to "morph" to only morph the children of the element designated by the target dom id.
+   * Set to "morph" to morph the target instead of replacing it: "replace" morphs the target element itself, and
+   * "update" morphs its children.
    */
   readonly method?: "morph";
 };
@@ -73,9 +83,19 @@ export type TurboStreamRefreshAction = {
   readonly action: "refresh";
 
   /**
-   * Dom ID to update
+   * Id of the request that caused the refresh. Turbo ignores the refresh in the browser that made that request.
    */
   readonly requestId?: string;
+
+  /**
+   * How the page is refreshed. Overrides the page's `<meta name="turbo-refresh-method">`.
+   */
+  readonly method?: "morph" | "replace";
+
+  /**
+   * Whether the scroll position is kept. Overrides the page's `<meta name="turbo-refresh-scroll">`.
+   */
+  readonly scroll?: "preserve" | "reset";
 };
 
 /**
@@ -96,7 +116,7 @@ export function isTurboStreamAction(v: unknown): v is TurboStreamAction {
   return (
     v !== undefined &&
     v !== null &&
-    actionNames.indexOf(value.action) !== -1 &&
+    NAMES_ACTIONS.indexOf(value.action) !== -1 &&
     (value.action === "refresh" || typeof value.target === "string")
   );
 }
@@ -111,14 +131,15 @@ export function serialize(actions: TurboStreamAction | TurboStreamAction[]): str
 function serializeOne(action: TurboStreamAction): string {
   switch (action.action) {
     case "remove":
-      return action.target
-        ? `<turbo-stream action="remove" target="${action.target}"></turbo-stream>`
-        : `<turbo-stream action="remove" targets="${action.targets}"></turbo-stream>`;
+      return `<turbo-stream${serializeAttributes([["action", "remove"], ...targetAttributes(action)])}></turbo-stream>`;
 
     case "refresh":
-      return action.requestId
-        ? `<turbo-stream action="refresh" request-id="${action.requestId}"></turbo-stream>`
-        : '<turbo-stream action="refresh"></turbo-stream>';
+      return `<turbo-stream${serializeAttributes([
+        ["action", "refresh"],
+        ["request-id", action.requestId],
+        ["method", action.method],
+        ["scroll", action.scroll],
+      ])}></turbo-stream>`;
 
     case "append":
     case "prepend":
@@ -126,26 +147,44 @@ function serializeOne(action: TurboStreamAction): string {
     case "update":
     case "before":
     case "after":
-      return action.target
-        ? `
-<turbo-stream action="${action.action}" target="${action.target}${getMorphAttribute(action)}">
-  <template>
-    ${action.content}
-  </template>
-</turbo-stream>`.trim()
-        : `
-<turbo-stream action="${action.action}" targets="${action.targets}${getMorphAttribute(action)}">
+      return `
+<turbo-stream${serializeAttributes([
+        ["action", action.action],
+        ...targetAttributes(action),
+        ["method", action.action === "replace" || action.action === "update" ? action.method : undefined],
+      ])}>
   <template>
     ${action.content}
   </template>
 </turbo-stream>`.trim();
+
     default:
       return "";
   }
 }
 
-function getMorphAttribute(action: TurboStreamAction): string {
-  return (action.action === "replace" || action.action === "update") && action.method === "morph"
-    ? ' action="morph"'
-    : "";
+type Attribute = [name: string, value: string | undefined];
+
+/**
+ * Uses `target` when it is set, and falls back to `targets`
+ */
+function targetAttributes(action: { target?: string; targets?: string }): Attribute[] {
+  return action.target ? [["target", action.target]] : [["targets", action.targets]];
+}
+
+/**
+ * Serializes attributes as ` name="value"`, skipping attributes without a value
+ */
+function serializeAttributes(attributes: Attribute[]): string {
+  return attributes
+    .filter((attribute): attribute is [string, string] => attribute[1] !== undefined && attribute[1] !== "")
+    .map(([name, value]) => ` ${name}="${escapeAttribute(value)}"`)
+    .join("");
+}
+
+/**
+ * Escapes a value so it can't break out of a double-quoted HTML attribute
+ */
+function escapeAttribute(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
