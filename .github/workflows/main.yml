@@ -37,7 +37,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       # Installs the npm dependencies with `npm ci` (via npmInstall, see build.gradle), runs check
-      # (biome + tsc, via npmCheck), compiles the Java sources, runs tsdown (via npmBuild) and builds
-      # the jar.
+      # (biome + tsc, via npmCheck), the node:test tests (via npmTest), compiles the Java sources, runs
+      # tsdown (via npmBuild) and builds the jar.
       - run: ./gradlew build
 

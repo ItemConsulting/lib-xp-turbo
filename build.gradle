@@ -90,6 +90,22 @@ tasks.register("npmCheck", NpmTask) {
 
 check.dependsOn npmCheck
 
+tasks.register("npmTest", NpmTask) {
+  dependsOn npmInstall
+  args = [
+    "run",
+    "test"
+  ]
+  environment = [
+    "FORCE_COLOR": "true",
+  ]
+  inputs.dir "src/test"
+  inputs.dir "src/main/resources"
+  outputs.upToDateWhen { false }
+}
+
+check.dependsOn npmTest
+
 tasks.withType(Copy).configureEach {
   includeEmptyDirs = false
 }

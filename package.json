@@ -43,12 +43,16 @@
   "scripts": {
     "build": "tsdown",
     "check": "concurrently -c auto -g --timings npm:check:types npm:lint",
-    "check:types": "tsc --noEmit -p src/main/resources/tsconfig.json",
+    "check:types": "concurrently --kill-others-on-fail -g -r --timings npm:check:types:*",
+    "check:types:server": "tsc --noEmit -p src/main/resources/tsconfig.json",
+    "check:types:tests": "tsc --noEmit -p src/test/tsconfig.json",
     "lint": "biome ci",
     "lint:fix": "biome check --write",
     "release": "changeset publish",
     "versioning": "changeset version && npm i --package-lock-only && node .changeset/gradle-version.mjs",
     "prepublishOnly": "tsc --project src/main/resources/tsconfig.json --declarationDir dist --emitDeclarationOnly true --declaration true",
-    "postpublish": "rm -r ./dist"
+    "postpublish": "rm -r ./dist",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./src/test/register.mjs --test src/test/*.test.mts",
+    "cov": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./src/test/register.mjs --test --experimental-test-coverage src/test/*.test.mts"
   }
 }
