@@ -35,9 +35,13 @@ repositories {
 }
 
 node {
-  download = true
+  // GitHub Actions sets CI, and has already installed Node with setup-node
+  download = !System.getenv("CI")
   // Single source of truth for the Node version, shared with .github/workflows and nvm
   version = file(".nvmrc").text.trim()
+  // In CI the build fails on a package-lock.json that has drifted from package.json,
+  // which a plain `npm install` would silently repair
+  npmInstallCommand = System.getenv("CI") ? "ci" : "install"
 }
 
 processResources {
@@ -56,23 +60,11 @@ tasks.register("npmBuild", NpmTask) {
   dependsOn npmInstall
   environment = [
     "FORCE_COLOR": "true",
-    "LOG_LEVEL_FROM_GRADLE": gradle.startParameter.logLevel.toString(),
-    "NODE_ENV": isDevBuild() ? "development" : "production"
+    "LOG_LEVEL_FROM_GRADLE": gradle.startParameter.logLevel.toString()
   ]
   inputs.dir "src/main/resources"
   outputs.dir "build/resources/main"
   outputs.upToDateWhen { false }
-}
-
-// Accepts -Penv=dev as well as the older -Pdev / -Pdevelopment spellings.
-// The legacy flags have to be read straight off the command line: Gradle exposes tasks as project properties, so
-// project.hasProperty("dev") is always true once the "dev" task below exists, which made every build a dev build.
-boolean isDevBuild() {
-  Map<String, String> cliProperties = gradle.startParameter.projectProperties
-
-  return project.findProperty("env") == "dev" ||
-    cliProperties.containsKey("dev") ||
-    cliProperties.containsKey("development")
 }
 
 tasks.register("dev", Exec) {
@@ -106,7 +98,7 @@ publishing {
   repositories {
     maven {
       name = "itemtestRepository"
-      url = version.endsWith('SNAPSHOT')
+      url = version.endsWith("SNAPSHOT")
         ? "https://repo.itemtest.no/snapshots"
         : "https://repo.itemtest.no/releases"
       credentials(PasswordCredentials)

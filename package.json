@@ -23,16 +23,16 @@
     "@enonic-types/core": "^8.0.0 || ^8.1.0-0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.14",
+    "@biomejs/biome": "^2.5.15",
     "@changesets/cli": "^3.0.3",
-    "@enonic-types/global": "8.1.0-B3",
-    "@enonic-types/core": "8.1.0-B3",
-    "@enonic-types/lib-sse": "8.1.0-B3",
-    "@enonic-types/lib-context": "8.1.0-B3",
-    "@swc/core": "^1.16.2",
+    "@enonic-types/global": "8.1.0",
+    "@enonic-types/core": "8.1.0",
+    "@enonic-types/lib-sse": "8.1.0",
+    "@enonic-types/lib-context": "8.1.0",
+    "@swc/core": "^1.16.18",
     "@types/node": "^26.0.0",
-    "concurrently": "^10.0.5",
-    "tsdown": "^0.23.0",
+    "concurrently": "^10.0.6",
+    "tsdown": "^0.23.1",
     "typescript": "^7.0.2"
   },
   "bugs": {
@@ -47,7 +47,7 @@
     "lint": "biome ci",
     "lint:fix": "biome check --write",
     "release": "changeset publish",
-    "versioning": "changeset version && npm i --package-lock-only && NEW_VERSION=$(node -p \"require('./package.json').version\") && sed -i -E \"s/^version *=.*/version = ${NEW_VERSION}/\" gradle.properties",
+    "versioning": "changeset version && npm i --package-lock-only && node .changeset/gradle-version.mjs",
     "prepublishOnly": "tsc --project src/main/resources/tsconfig.json --declarationDir dist --emitDeclarationOnly true --declaration true",
     "postpublish": "rm -r ./dist"
   }

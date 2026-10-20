@@ -1,4 +1,5 @@
-import type { Request, Response } from "@enonic-types/core";
+import type { Request } from "@enonic-types/core";
+import { get as getContext, setCustomLocalAttribute } from "/lib/xp/context";
 import { sendToGroup } from "/lib/xp/sse";
 import {
   serialize,
@@ -24,14 +25,24 @@ export const API_TURBO_STREAMS = "turbo-streams";
 export const DEFAULT_GROUP_ID = "turbo-streams";
 
 /**
- * Mime type to use when returning Turbo Streams over HTTP
+ * Mime type of Turbo Streams, as sent by Turbo in the "Accept" header
  */
-export const MIME_TYPE_TURBO_STREAMS = "text/vnd.turbo-stream.html; charset=utf-8";
+export const MIME_TYPE_TURBO_STREAMS = "text/vnd.turbo-stream.html";
 
 /**
- * A header field that can be temporarily used to send a payload to the "turbo-streams" processor
+ * Content type to use when returning Turbo Streams over HTTP
  */
-export const HEADER_KEY_TURBO = "x-tmp-turbo";
+export const CONTENT_TYPE_TURBO_STREAMS = `${MIME_TYPE_TURBO_STREAMS}; charset=utf-8`;
+
+/**
+ * The key for storing a Turbo Stream we want to return as a body
+ */
+export const CONTEXT_ATTRIBUTE_TURBO_STREAM = "no.item.turbo.stream.body";
+
+/**
+ * The key for storing a Turbo Stream we want to return as a body
+ */
+export const CONTEXT_ATTRIBUTE_TURBO_STREAM_OUT = `custom.${CONTEXT_ATTRIBUTE_TURBO_STREAM}`;
 
 /**
  * Append some markup to a target id in the dom over server-sent events
@@ -133,14 +144,22 @@ export function acceptTurboStreams(req: Request): boolean {
 }
 
 /**
- * Creates a response for a part that can be processed by the "turbo-streams" processor
+ * The HTTP Response will return the actions as a string with mime type text/vnd.turbo-stream.html
  */
-export function createTurboStreamResponse(actions: TurboStreamAction | TurboStreamAction[]): Response {
-  return {
-    headers: {
-      [HEADER_KEY_TURBO]: serialize(actions),
-    },
-  };
+export function setTurboStreamHTTPResponse(actions: TurboStreamAction | TurboStreamAction[]): void {
+  setCustomLocalAttribute<string>(CONTEXT_ATTRIBUTE_TURBO_STREAM, serialize(actions));
+}
+
+/**
+ * Returns the Turbo Stream set by `setTurboStreamHTTPResponse()` in this request, and clears it
+ */
+export function consumeTurboStreamHTTPResponse(): string | undefined {
+  const body = getContext<{ [CONTEXT_ATTRIBUTE_TURBO_STREAM_OUT]: string }>().attributes[
+    CONTEXT_ATTRIBUTE_TURBO_STREAM_OUT
+  ];
+
+  setCustomLocalAttribute(CONTEXT_ATTRIBUTE_TURBO_STREAM, null);
+  return body;
 }
 
 /**

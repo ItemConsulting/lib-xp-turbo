@@ -1,5 +1,5 @@
-import { existsSync, globSync } from "node:fs";
-import { sep } from "node:path";
+import { globSync } from "node:fs";
+import { dirname, relative, resolve, sep } from "node:path";
 import { transform } from "@swc/core";
 import { defineConfig } from "tsdown";
 
@@ -25,29 +25,37 @@ function entries(dir: string, exts: string, exclude: string[] = []): Record<stri
 
 const serverEntry = entries(SRC, "{ts,js}", ["**/*.d.ts"]);
 
-// XP resolves an absolute import at runtime against the app's own resources
+// XP resolves absolute imports at runtime: against the app's own resources
 // first, then against the modules provided by the runtime: XP's own libraries
 // (/lib/xp/*), libraries `include`d in build.gradle, modules from other apps.
-// Mirror that rule at build time: bundle an absolute import only when it is a
-// source file of this app, and leave every other one to the runtime — no list
-// of runtime modules to maintain. A mistyped specifier is caught by
-// `check:types` (TS2307), not by the bundler.
-const SRC_EXTS = [".ts", ".js"];
-const appSourceCache = new Map<string, boolean>();
-function isAppSource(id: string): boolean {
-  let hit = appSourceCache.get(id);
-  if (hit === undefined) {
-    hit = SRC_EXTS.some((ext) => existsSync(`${SRC}${id}${ext}`) || existsSync(`${SRC}${id}/index${ext}`));
-    appSourceCache.set(id, hit);
-  }
-  return hit;
-}
+// Leave all of them to the runtime, including imports between this library's
+// own source files, so each source file becomes exactly one output file. Only
+// npm packages are bundled. A mistyped specifier is caught by `check:types`
+// (TS2307), not by the bundler.
 const isRuntimeModule = (id: string, _importer: string | undefined, isResolved: boolean): boolean =>
-  !isResolved && id.startsWith("/") && !isAppSource(id);
+  !isResolved && id.startsWith("/");
+
+// A relative import between source files is rewritten to its absolute resource
+// path ("./actions" in lib/turbo-streams/index.ts becomes
+// "/lib/turbo-streams/actions") and left to the runtime. Rolldown would otherwise
+// rewrite a relative external against the output root, and get it wrong.
+const SRC_DIR = resolve(SRC);
+const relativeSourceImports = {
+  name: "relative-source-imports",
+  resolveId(id: string, importer: string | undefined) {
+    if (!id.startsWith(".") || !importer?.startsWith(`${SRC_DIR}${sep}`)) {
+      return null;
+    }
+    const path = relative(SRC_DIR, resolve(dirname(importer), id)).replaceAll(sep, "/");
+    return { id: `/${path}`, external: "absolute" as const };
+  },
+};
 
 // Nashorn (XP's server-side JS engine) lacks ES2015 destructuring, but Oxc —
 // tsdown's transformer — can't target below es2015. Re-lower the bundled server
-// output to es5 with SWC after bundling, so bundled deps are covered too.
+// output to es5 with SWC after bundling, so bundled deps are covered too. SWC
+// does all the lowering: Oxc's own down-level helpers call ES2016+ APIs (e.g.
+// Array#includes for object rest) that Nashorn lacks.
 const nashornEs5 = {
   name: "nashorn-es5",
   async renderChunk(code: string) {
@@ -66,33 +74,29 @@ const nashornEs5 = {
   },
 };
 
-// Skip the build when there are no source files to bundle.
+// One build per source file: with a single entry, Rolldown has nothing to share
+// between entries, so it never extracts chunks (e.g. Oxc's runtime helpers like
+// _objectSpread2). The helpers are inlined into each file that needs them, which
+// makes the output easier to debug. No entries means no builds.
 export default defineConfig(
-  Object.keys(serverEntry).length
-    ? [
-        {
-          entry: serverEntry,
-          outDir: DST,
-          format: "cjs" as const,
-          target: "es2015", // Rolldown/oxc floor; nashornEs5 plugin re-lowers to es5 for Nashorn
-          platform: "neutral" as const,
-          clean: false, // outDir also holds resources copied there by Gradle
-          dts: false, // d.ts files are useless at runtime
-          minify: false, // minifying server files makes debugging harder
-          sourcemap: false,
-          logLevel,
-          plugins: [nashornEs5],
-          tsconfig: `${SRC}/tsconfig.json`,
-          inputOptions: {
-            external: isRuntimeModule,
-            resolve: {
-              mainFields: ["module", "main"],
-            },
-          },
-          outputOptions: {
-            chunkFileNames: "_chunks/[name]-[hash].js", // avoid chunk-name collisions
-          },
-        },
-      ]
-    : [],
+  Object.entries(serverEntry).map(([name, file]) => ({
+    entry: { [name]: file },
+    outDir: DST,
+    format: "cjs" as const,
+    target: "esnext", // No lowering by Oxc; nashornEs5 plugin lowers to es5 for Nashorn
+    platform: "neutral" as const,
+    clean: false, // outDir also holds resources copied there by Gradle
+    dts: false, // d.ts files are useless at runtime
+    minify: false, // minifying server files makes debugging harder
+    sourcemap: false,
+    logLevel,
+    plugins: [relativeSourceImports, nashornEs5],
+    tsconfig: `${SRC}/tsconfig.json`,
+    inputOptions: {
+      external: isRuntimeModule,
+      resolve: {
+        mainFields: ["module", "main"],
+      },
+    },
+  })),
 );

@@ -284,37 +284,41 @@ turboStreamsLib.append({
 
 ### Turbo Streams over HTTP
 
-It is also possible to return turbo streams over http with the `Content-Type` `"text/vnd.turbo-stream.html; charset=utf-8"`.
+It is also possible to return turbo streams over http with the `Content-Type` `"text/vnd.turbo-stream.html; charset=utf-8"`
+(exported as `CONTENT_TYPE_TURBO_STREAMS`).
 
 This can for instance be returned by a form submission to perform multiple actions the web page's dom.
 
-Use the `acceptTurboStreams()` to check if Turbo Streams is supported. Then use `serialize()` to transform
-an `Array` of `{ action, target, content }` to a `string` with Turbo Stream actions.
+Use the `acceptTurboStreams()` to check if Turbo Streams is supported. Then call `setTurboStreamHTTPResponse()` with an
+`Array` of `{ action, target, content }` to make those Turbo Stream actions the body of the response.
 
-```javascript
-var turboStreamsLib = require('/lib/turbo-streams');
+```typescript
+import { acceptTurboStreams, setTurboStreamHTTPResponse } from "/lib/turbo-streams";
+import type { Request, Response } from "@enonic-types/core";
 
-exports.post = function(req) {
+export function POST(req: Request): Response {
   // if "Accept" header includes mime type
-  if (turboStreamsLib.acceptTurboStreams(req)) {
-    return turboStreamsLib.createTurboStreamResponse([
+  if (acceptTurboStreams(req)) {
+    // Since this is a part, we must use `setTurboStreamHTTPResponse` to hijack the whole response (no page or layout)
+    setTurboStreamHTTPResponse([
       {
-        action: 'append',
-        target: 'my-alert-wrapper-id',
-        content: '<div role="alert">Something went wrong</div>'
+        action: "append",
+        target: "my-alert-wrapper-id",
+        content: '<div role="alert">Something went wrong</div>',
       },
       {
-        action: 'replace',
-        target: 'status-id',
-        content: '<div>Status has changed</div>'
-      }
+        action: "replace",
+        target: "status-id",
+        content: "<div>Status has changed</div>",
+      },
     ]);
-  } else {
-    return {
-      status: 200,
-      body: "This page doesn't accept Turbo Streams"
-    };
   }
+  
+  return {
+    status: 200,
+    // If `setTurboStreamHTTPResponse` was called this `body` will be overwritten in the response processor
+    body: "This is the normal page returned to everyone!",
+  };
 }
 ```
 
@@ -331,7 +335,9 @@ kind: "Site"
 ```
 
 > [!NOTE]
-> Behind the scenes, a header field `"x-tmp-turbo"` is used to pass the response body from the part to the response processor
+> Behind the scenes, `setTurboStreamHTTPResponse()` stores the Turbo Stream in a local context attribute
+> (`"custom.no.item.turbo.stream.body"`), which the response processor reads, clears and returns as the response body.
+> Without the processor configured, the part's own response is rendered as normal.
 
 ## Development
 
