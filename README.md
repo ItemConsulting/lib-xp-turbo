@@ -9,19 +9,34 @@ Enonic XP Library for integrating with [Turbo Streams](https://turbo.hotwire.dev
 
 <img src="https://github.com/ItemConsulting/lib-xp-turbo/raw/main/docs/icon.svg?sanitize=true" width="150">
 
+## Compatibility ##
+
+| Enonic XP | This library |
+| --------- | ------------ |
+| 8.x       | 2.x          |
+| 7.x       | 1.x          |
+
 ## Setup
 
-Add `"turbo-streams"` to your *cms/site.yaml* to expose the API on your site:
+To enable Turbo streams on your XP site, you need expose an API, and add a processor to you  *cms/site.yaml*.
 
-```diff
+```yaml
+# yaml-language-server: $schema=https://www.schemastore.org/enonic-xp-site-8.0.0.json
 kind: "Site"
-+ apis:
-+   - "turbo-streams"
+apis:
+  - "turbo-streams" # 1
+processors:
+  - name: "turbo-streams" # 2
+    order: 10
 ```
 
-## Gradle
+1. The `"turbo-streams"` API exposes a stream of [SSE](https://developer.enonic.com/docs/code/stable/libraries/lib-sse) 
+   that can perform CRUD actions on the DOM. Set the `[src]` of your `<turbo-stream-source src="...">` to this API-URL.
+2. The `"turbo-streams"` [response processor](https://developer.enonic.com/docs/xp/stable/cms/response-processors) lets
+   parts return Turbo Stream as the response body from a normal HTTP Request (using `setTurboStreamHTTPResponse()`) – 
+   without markup returned from other parts, layouts and pages.
 
-Version 2 of this library requires Enonic XP 8, and is built against XP 8.1.0-B3. Use version 1.x for Enonic XP 7.
+## Gradle
 
 To install this library you may need to add some new dependencies to your app's build.gradle file.
 
@@ -36,13 +51,9 @@ dependencies {
 }
 ```
 
-The library depends on `lib-sse`, which your app picks up transitively. Webjars are not included transitively, so the
-Turbo webjar has to be added to your app.
-
 ### TypeScript
 
-You can add the following changes to your *tsconfig.json* to get TypeScript-support. Leave out `baseUrl`: TypeScript 7
-no longer supports it, and `paths` resolve relative to the *tsconfig.json* file without it.
+You can add the following changes to your *tsconfig.json* to get TypeScript-support.
 
 ```diff
 {
@@ -64,8 +75,7 @@ no longer supports it, and `paths` resolve relative to the *tsconfig.json* file 
 > Read the [Turbo documentation](https://turbo.hotwire.dev/handbook/introduction) to make sure that this is something you
 > want to do.
 
-
- 1. Import the turbo script in your page html (has to be in `<head>`).
+ 1. Import the turbo script in your page HTML (has to be in `<head>`).
  2. Set the `"turbo-streams"` API to be the `<turbo-stream-source>` of the page. (Has to be in `<body>`).
 
 Pass the stream url from your page controller to the template:
@@ -106,32 +116,19 @@ export function get(): Response {
 </body>
 ```
 
-Turbo opens an [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) against the url, and the
-`"turbo-streams"` API keeps the connection open as a stream of
-[server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events).
-
 ### Connections and HTTP/1.1
 
 Every page with a `<turbo-stream-source>` holds one long-lived HTTP connection open for as long as the page is open.
 
+Serve the site over **HTTP/2** (or HTTP/3) in production. Over HTTP/1.1, browsers only allow **6 open connections per 
+domain**, shared by every tab.
+
 > [!WARNING]
-> Over HTTP/1.1, browsers allow only about **6 open connections per domain**, shared by every tab. Each open
-> stream uses one of them for as long as the page is open, so a user with around 6 tabs open against the same site
-> will have regular page loads, assets and form posts stall, waiting for a free connection.
->
-> Serve the site over **HTTP/2** (or HTTP/3) in production. It sends all requests over a single connection, which
-> removes the limit in practice. This is usually enabled on the reverse proxy or load balancer in front of Enonic XP.
->
-> Local development against `http://localhost:8080` runs over HTTP/1.1, so you can hit the limit there with many tabs
+> Local development against `http://localhost:8080` runs over HTTP/1.1, so you can hit the limit there with many tabs 
 > open.
-
-Other things to be aware of:
-
-- **Idle connections are closed.** Enonic XP closes a connection with no traffic after 60 seconds by default (`timeout`
-  in *com.enonic.xp.web.jetty.cfg*), and proxies often have similar limits. The browser reconnects automatically, but
-  messages sent while a stream is reconnecting are lost.
-- **Proxies must not buffer the stream.** A proxy that buffers or compresses responses holds events back until the
-  buffer fills. For nginx, turn off `proxy_buffering` for the API path (or send `X-Accel-Buffering: no`).
+> 
+> If you are using Nginx, set `proxy_http_version 1.1` together with `proxy_set_header Connection ""`,
+> or turn off `proxy_buffering` for the API path.
 
 ## Usage
 
@@ -148,9 +145,10 @@ You can now directly manipulate the dom from serverside JavaScript over server-s
 Every function also takes an optional `group`, see [Selecting streams](#selecting-streams).
 
 Use `targets` with a CSS selector instead of `target` to update several elements at once. `method: "morph"` on `replace`
-and `update` morphs the existing dom instead of replacing it, which keeps state like focus and scroll position. On
-`refresh`, `method` (`"morph"` or `"replace"`) and `scroll` (`"preserve"` or `"reset"`) override the page's
-`turbo-refresh-method` and `turbo-refresh-scroll` meta tags, and need Turbo 8.0.21 or newer.
+and `update` morphs the existing dom instead of replacing it, which keeps state like focus and scroll position.
+
+On `refresh`, `method` (`"morph"` or `"replace"`) and `scroll` (`"preserve"` or `"reset"`) override the page's
+`turbo-refresh-method` and `turbo-refresh-scroll` meta tags.
 
 ### Example
 
@@ -210,20 +208,6 @@ turboStreamsLib.refresh({
   requestId: 'my-refresh-id',
   method: 'morph',
   scroll: 'preserve'
-});
-```
-
-### Send any action
-
-`sendBySSE()` sends a Turbo Stream action where the action is a parameter. It is useful when the action is decided at
-runtime:
-
-```javascript
-turboStreamsLib.sendBySSE({
-  action: 'append',
-  target: 'my-alert-wrapper-id',
-  content: '<div role="alert">Something went wrong</div>',
-  group: turboStreamsLib.DEFAULT_GROUP_ID // optional
 });
 ```
 
@@ -321,23 +305,6 @@ export function POST(req: Request): Response {
   };
 }
 ```
-
-Use the "turbo-streams" [response processor](https://developer.enonic.com/docs/xp/stable/cms/response-processors) 
-– included in this library – to make the response body from a *part* become the whole payload returned to the browser.
-
-You need to configure your *cms/site.yaml* with the following:
-
-```diff
-kind: "Site"
-+ processors:
-+   - name: "turbo-streams"
-+     order: 10
-```
-
-> [!NOTE]
-> Behind the scenes, `setTurboStreamHTTPResponse()` stores the Turbo Stream in a local context attribute
-> (`"custom.no.item.turbo.stream.body"`), which the response processor reads, clears and returns as the response body.
-> Without the processor configured, the part's own response is rendered as normal.
 
 ## Development
 

@@ -20,7 +20,7 @@
     "node": ">=24.18.0"
   },
   "peerDependencies": {
-    "@enonic-types/core": "^8.0.0 || ^8.1.0-0"
+    "@enonic-types/core": "^8.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
@@ -30,7 +30,7 @@
     "@enonic-types/lib-sse": "8.1.0",
     "@enonic-types/lib-context": "8.1.0",
     "@swc/core": "^1.16.18",
-    "@types/node": "^26.0.0",
+    "@types/node": "^24",
     "concurrently": "^10.0.6",
     "tsdown": "^0.23.1",
     "typescript": "^7.0.2"
