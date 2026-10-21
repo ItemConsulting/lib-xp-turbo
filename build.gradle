@@ -1,24 +1,46 @@
 plugins {
-  id "java"
+  id "java-library"
   id "maven-publish"
-  id "com.enonic.xp.base" version "3.6.2"
-  id "com.github.node-gradle.node"  version "7.1.0"
+  id "com.enonic.xp.base"
+  id "com.github.node-gradle.node" version "7.1.0"
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+// XP 8 requires Java 25 (core-api declares osgi.ee=JavaSE;version=25), so pin the toolchain used to compile.
+// Note this does not free the build from the JDK that runs Gradle itself: the com.enonic.xp.settings plugin in
+// settings.gradle needs a Gradle JVM of 21 or newer, and fails during settings evaluation on anything older.
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(25)
+  }
+  withSourcesJar()
+}
 
 dependencies {
-  compileOnly "com.enonic.xp:portal-api:${xpVersion}"
+  // XP APIs the Java sources compile against. Provided by the XP runtime, so
+  // they must not be bundled into the app.
+  // portal-api brings web-api and script-api along transitively.
+  compileOnly xplibs.api.core
+  compileOnly xplibs.api.portal
+
+  // XP libraries the JavaScript sources require at runtime. Declared as implementation so they
+  // land in the published POM, and apps that include this library pick them up transitively.
+  implementation xplibs.sse
+  implementation xplibs.context
 }
 
 repositories {
   mavenCentral()
   xp.enonicRepo()
 }
+
 node {
-  download = true
+  // GitHub Actions sets CI, and has already installed Node with setup-node
+  download = !System.getenv("CI")
+  // Single source of truth for the Node version, shared with .github/workflows and nvm
   version = file(".nvmrc").text.trim()
+  // In CI the build fails on a package-lock.json that has drifted from package.json,
+  // which a plain `npm install` would silently repair
+  npmInstallCommand = System.getenv("CI") ? "ci" : "install"
 }
 
 processResources {
@@ -26,15 +48,6 @@ processResources {
   exclude "**/*.json"
   exclude "**/*.ts"
   exclude "**/*.tsx"
-  includeEmptyDirs false
-}
-
-tasks.register("dev", Exec) {
-  if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-    commandLine "cmd", "/c", "gradlew.bat", "deploy", "-t"
-  } else {
-    commandLine "./gradlew", "deploy", "-t"
-  }
 }
 
 tasks.register("npmBuild", NpmTask) {
@@ -46,12 +59,19 @@ tasks.register("npmBuild", NpmTask) {
   dependsOn npmInstall
   environment = [
     "FORCE_COLOR": "true",
-    "LOG_LEVEL_FROM_GRADLE": gradle.startParameter.logLevel.toString(),
-    "NODE_ENV": project.hasProperty("dev") || project.hasProperty("development") ? "development" : "production"
+    "LOG_LEVEL_FROM_GRADLE": gradle.startParameter.logLevel.toString()
   ]
   inputs.dir "src/main/resources"
   outputs.dir "build/resources/main"
   outputs.upToDateWhen { false }
+}
+
+tasks.register("dev", Exec) {
+  if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+    commandLine "cmd", "/c", "gradlew.bat", "deploy", "-t"
+  } else {
+    commandLine "./gradlew", "deploy", "-t"
+  }
 }
 
 jar.dependsOn npmBuild
@@ -67,6 +87,24 @@ tasks.register("npmCheck", NpmTask) {
   ]
 }
 
+check.dependsOn npmCheck
+
+tasks.register("npmTest", NpmTask) {
+  dependsOn npmInstall
+  args = [
+    "run",
+    "test"
+  ]
+  environment = [
+    "FORCE_COLOR": "true",
+  ]
+  inputs.dir "src/test"
+  inputs.dir "src/main/resources"
+  outputs.upToDateWhen { false }
+}
+
+check.dependsOn npmTest
+
 tasks.withType(Copy).configureEach {
   includeEmptyDirs = false
 }
@@ -75,7 +113,7 @@ publishing {
   repositories {
     maven {
       name = "itemtestRepository"
-      url = version.endsWith('SNAPSHOT')
+      url = version.endsWith("SNAPSHOT")
         ? "https://repo.itemtest.no/snapshots"
         : "https://repo.itemtest.no/releases"
       credentials(PasswordCredentials)
@@ -87,9 +125,9 @@ publishing {
   publications {
     maven(MavenPublication) {
       from components.java
-      groupId group
-      artifactId projectName
-      version version
+      groupId = project.group
+      artifactId = projectName
+      version = project.version
     }
   }
 }

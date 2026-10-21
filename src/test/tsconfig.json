@@ -1,0 +1,26 @@
+{
+  // Type-checks the node:test suite. Runtime resolution of "/lib/*" and the other absolute specifiers is
+  // done by loader.mjs; here the same specifiers are mapped for the compiler. Paths are relative to this
+  // directory (src/test).
+  "include": ["*.test.mts", "helpers.mts", "stubs/*.mts"],
+
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "strict": true,
+
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    "paths": {
+      "/lib/xp/sse": ["./stubs/lib-xp-sse.mts"],
+      "/lib/xp/context": ["./stubs/lib-xp-context.mts"],
+      "/*": ["../main/resources/*"]
+    },
+
+    "skipLibCheck": true,
+    "types": ["node", "@enonic-types/global"]
+  }
+}

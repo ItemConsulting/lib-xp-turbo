@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://www.schemastore.org/enonic-xp-api-8.0.0.json
+kind: "API"
+title: "Turbo Streams"
+description: "Server-sent events that push Turbo Stream actions to the browser"
+documentationUrl: "https://github.com/ItemConsulting/lib-xp-turbo"
+mount: ["web"]
+allow:
+  - "role:system.everyone"

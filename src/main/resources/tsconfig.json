@@ -8,7 +8,7 @@
   // Specifies an array of filenames or patterns to include in the program.
   // These filenames are resolved relative to the directory containing the
   // tsconfig.json file.
-  "include": ["./**/*.ts"],
+  "include": ["**/*.ts"],
 
   // Specifies an array of filenames or patterns that should be skipped when
   // resolving include.
@@ -21,15 +21,23 @@
   "exclude": ["**/*.d.ts"],
 
   "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["ES5"],
+
+    // Enable all strict type-checking options.
     "strict": true,
+
+    // Must be set explicitly (TS5011). Keeps "prepublishOnly" emitting to
+    // dist/lib/turbo-streams/index.d.ts, which package.json points "types" at.
+    "rootDir": ".",
 
     // A series of entries which re-map imports to lookup locations relative
     // to the baseUrl if set, or to the tsconfig file itself otherwise.
     "paths": {
       "/lib/xp/*": ["../../../node_modules/@enonic-types/lib-*"],
-      "/lib/*": ["../../../src/main/resources/lib/*", "../../../node_modules/@item-enonic-types/lib-*"]
+      "/*": ["./*"]
     },
-    "lib": ["ES5"],
+
     "skipLibCheck": true,
 
     // By default all visible ”@types” packages are included in your compilation.
