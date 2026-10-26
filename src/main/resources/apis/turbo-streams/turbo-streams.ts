@@ -16,7 +16,7 @@ type SSEResponse<Attributes = Record<PropertyKey, never>> = {
 
 type SSEAttributes = {
   usersPersonalGroupName: string;
-  group: string | undefined;
+  group?: string;
 };
 
 const MIME_TYPE_EVENT_STREAM = "text/event-stream";
@@ -28,11 +28,14 @@ export function GET(req: Request<{ params: SSEQueryParams }>): Response | SSERes
     };
   }
 
+  const group = firstValue(req.params.group);
+
+  // XP fails the request if an SSE attribute is undefined, so only set group when given
   return {
     sse: {
       attributes: {
         usersPersonalGroupName: getUsersPersonalGroupName(),
-        group: firstValue(req.params.group),
+        ...(group ? { group } : {}),
       },
     },
   };
