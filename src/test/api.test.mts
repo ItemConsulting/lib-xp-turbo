@@ -5,7 +5,7 @@ import { calls, load, request } from "./helpers.mts";
 
 const EVENT_STREAM = { Accept: "text/event-stream" };
 
-type Attributes = { usersPersonalGroupName: string; group: string | undefined };
+type Attributes = { usersPersonalGroupName: string; group?: string };
 
 function sseEvent(type: SseEvent["type"], attributes?: Attributes): SseEvent<Attributes> {
   return { type, clientId: "client-1", attributes } as SseEvent<Attributes>;
@@ -18,12 +18,12 @@ describe("turbo-streams API", () => {
     assert.deepEqual(api.GET(request({ Accept: "text/html" })), { status: 406 });
   });
 
-  it("opens a stream, with the user's personal group as attribute", async () => {
+  it("opens a stream, with the user's personal group as the only attribute when no group is given", async () => {
     const { api } = await load();
 
     assert.deepEqual(api.GET(request(EVENT_STREAM)), {
       sse: {
-        attributes: { usersPersonalGroupName: "turbo-streams-session-1", group: undefined },
+        attributes: { usersPersonalGroupName: "turbo-streams-session-1" },
       },
     });
   });
@@ -61,7 +61,7 @@ describe("turbo-streams API", () => {
   it("joins only the personal and default groups when no group was requested", async () => {
     const { api, sse } = await load();
 
-    api.sseEvent(sseEvent("open", { usersPersonalGroupName: "turbo-streams-session-1", group: undefined }));
+    api.sseEvent(sseEvent("open", { usersPersonalGroupName: "turbo-streams-session-1" }));
 
     assert.deepEqual(
       calls(sse.addToGroup).map(([params]) => (params as { group: string }).group),
@@ -71,7 +71,7 @@ describe("turbo-streams API", () => {
 
   it("does nothing on the other stream events", async () => {
     const { api, sse } = await load();
-    const attributes = { usersPersonalGroupName: "turbo-streams-session-1", group: undefined };
+    const attributes = { usersPersonalGroupName: "turbo-streams-session-1" };
 
     api.sseEvent(sseEvent("close", attributes));
     api.sseEvent(sseEvent("timeout", attributes));
