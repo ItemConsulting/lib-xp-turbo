@@ -3,7 +3,7 @@
   "sideEffects": false,
   "description": "Type definitions for lib-xp-turbo",
   "author": "Tom Arild Jakobsen <tajakobsen@gmail.com>",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "license": "MIT",
   "types": "dist/lib/turbo-streams/index.d.ts",
   "files": [
