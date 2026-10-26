@@ -1,5 +1,11 @@
 # @item-enonic-types/lib-turbo-streams
 
+## 2.0.0-beta.1
+
+### Patch Changes
+
+- 12f28bc: Fix 500 error when opening a stream without the `group` query parameter. The SSE attribute is now only set when a group is given.
+
 ## 2.0.0-beta.0
 
 ### Major Changes
